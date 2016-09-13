@@ -1,0 +1,39 @@
+#!/bin/bash
+
+. $srcdir/testFuncs.sh
+
+# Check for GPU
+haveGPU || exit 3
+
+PARSET=$PWD/tMACfeedback.in_parset
+
+# Create and use LOFARROOT environment
+mklofarroot tMACfeedback_tmp.lofarroot
+
+# Add the connection information for this test
+echo "Cobalt.Feedback.host=localhost" >> $PARSET
+echo "Cobalt.Feedback.remotePath=$LOFARROOT/var/run" >> $PARSET
+
+# Start a mock OnlineControl to verify the communications of runObservation.sh
+MockOnlineControl.sh $PARSET &
+ONLINECONTROL_PID=$!
+
+# Run the observation
+runObservation.sh -l 1 $PARSET
+OBSRESULT=$?
+
+# Wait for OnlineControl to finish
+wait $ONLINECONTROL_PID
+ONLINECONTROLRESULT=$?
+
+if [ $OBSRESULT -gt 0 ]; then
+  exit $OBSRESULT
+fi
+
+if [ $ONLINECONTROLRESULT -gt 0 ]; then
+  exit $ONLINECONTROLRESULT
+fi
+
+# Everything went ok
+exit 0
+

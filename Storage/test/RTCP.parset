@@ -1,0 +1,101 @@
+OLAP.OLAP_Conn.BGLProc_Storage_Ports = [8300..8363]
+
+# should be one of FCNP, TCP, NULL.  This works for IONProc, but not for
+# BGLProc, since BGLProc does not open the parset file!
+OLAP.OLAP_Conn.IONProc_BGLProc_Transport = FCNP
+
+OLAP.OLAP_Conn.rawDataOutputs = [tcp:10.181.0.2:4000]
+
+OLAP.realTime = T
+# OLAP.BGLProc.integrationSteps = 608  #768 at 200MHz (generated)
+OLAP.BGLProc.nrPPFTaps=16
+OLAP.BGLProc.coresPerPset = 64
+
+# OLAP.IONProc.integrationSteps = 1 (generated)
+
+# OLAP.StorageProc.integrationSteps = 60 (generated)
+OLAP.StorageProc.subbandsPerMS = 1
+Observation.MSNameMask = /data/L${YEAR}_${MSNUMBER}/SB${SUBBAND}.MS
+
+# Variables for the DelayCompensation
+OLAP.DelayComp.positionType  = ITRF  # should be ITRF
+OLAP.DelayComp.nrCalcDelays = 16
+
+OLAP.IPHeaderSize = 32
+OLAP.EPAHeaderSize = 16
+OLAP.nrTimesInFrame = 16
+OLAP.nrSlotsInFrame = 36
+OLAP.nrBitsPerSample=16
+OLAP.nrSecondsOfBuffer = 4
+OLAP.maxNetworkDelay = 0.5
+OLAP.delayCompensation = F
+OLAP.correctBandPass = T
+
+# Observation.sampleClock = 160
+
+#Observation.bandFilter = LBL_10_80
+#Observation.bandFilter = LBL_30_80
+#Observation.bandFilter = LBH_10_80
+#Observation.bandFilter = LBH_30_80
+Observation.bandFilter = HB_100_190
+#Observation.bandFilter = HB_170_230
+#Observation.bandFilter = HB_210_240
+
+# Eg. tiedArray beamforming
+#Observation.Beamformer[0].stationList = "B01_0,B01_1"
+#Observation.Beamformer[1].stationList = "B01_2,B01_3"
+
+Observation.Beam[0].angle1 = 0                  # NCP
+Observation.Beam[0].angle2 = 1.570796327
+Observation.Beam[1].angle1 = 5.2336866848083394 # Cygnus
+Observation.Beam[1].angle2 = 0.71094251447010637
+Observation.Beam[2].angle1 = 6.1234876806221052 # Cas A
+Observation.Beam[2].angle2 = 1.0265153995604648
+Observation.Beam[3].angle1 = 0.9293405574       # pulsar
+Observation.Beam[3].angle2 = 0.9525774347
+Observation.Beam[4].angle1 = 4.5192832066722115 # Jupiter
+Observation.Beam[4].angle2 = 5.893698795
+Observation.Beam[5].angle1 = 1.4596748494230258 # Taurus
+Observation.Beam[5].angle2 = 0.38422502336661052
+
+Observation.Beam[0].directionType = J2000
+Observation.Beam[1].directionType = J2000
+Observation.Beam[2].directionType = J2000
+
+# Eg. [ 300..303, 40 ] --> [ 300,301,302,303,40 ]
+#     [ 10*0         ] --> [ 0,0,0,0,0,0,0,0,0,0 ]
+#     [ 3*(0;1;2;3)  ] --> [ 0,1,2,3,0,1,2,3,0,1,2,3 ]
+#     [ 3*(300..303) ] --> [ 300,301,302,303,300,301,302,303,300,301,302,303 ]
+#     [ 2*(5*0)      ] --> [ 0,0,0,0,0,0,0,0,0,0 ]       
+
+#Observation.subbandList  = [300..335]
+Observation.beamList     = [36*0]
+Observation.rspBoardList = [36*0]
+Observation.rspSlotList  = [0..35]
+
+#Observation.subbandList  = [300]
+#Observation.beamList     = [0]
+#Observation.rspBoardList = [0]
+#Observation.rspSlotList  = [0]
+
+#Observation.subbandList  = [300..331]
+#Observation.beamList     = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+#Observation.rspBoardList = [0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3]
+#Observation.rspSlotList  = [0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7]
+
+# Eg. SAS/MAC: uStation mode:
+#Observation.Beam[0].subbandList = [300..335,300..335,300..335,300..335]
+#Observation.Beam[0].beamletList = [0..35,36..71,72..107,108..143]
+
+Observation.Beam[0].subbandList = [300..335]
+Observation.Beam[0].beamletList = [0..35]
+
+# Eg. SAS/MAC: station mode:
+#Observation.Beam[0].subbandList = [300..331]
+#Observation.Beam[0].beamletList = [0..7,36..43,72..79,108..115]
+
+
+Observation.channelsPerSubband = 256
+Observation.nrPolarisations = 2
+
+OLAP.psetsPerStorage = 1

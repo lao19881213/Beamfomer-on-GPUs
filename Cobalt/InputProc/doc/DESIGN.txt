@@ -1,0 +1,37 @@
+The InputProc package manages the data flow from the packets that are received
+from the antenna fields, to the input buffers of GPUProc.
+
+The data flow between systems is as follows:
+
+[Station] --UDP--> [IONode] --MPI--> [GPUNode]
+
+The extended data flow between classes is as follows:
+
+[Station/Generator]               Generator: a class that emulates RSP boards
+   |
+  UDP [Station/RSP]               RSP: describes the packet format
+   |
+   V
+[Station/PacketReader]            PacketReader: reads RSP packets from any Stream
+   |
+  L1 cache [Station/RSP]
+   |
+   V
+[Station/PacketWriter]            PacketWriter: writes RSP packets into a
+   |                                            circular buffer
+  SHM [Buffer/SampleBuffer]       SampleBuffer: manages a circular buffer
+   |                                            in shared memory (SHM)
+   V
+[Buffer/BlockReader]              BlockReader: generates copy information to
+   |                                           read blocks from the circular
+  (pointers)                                   buffer
+   |
+   V
+[Transpose/MPISendStation]        MPISendStation: distributes subbands from
+   |                                              a single station
+  MPI
+   |
+   V
+[Transpose/MPIReceiveStations]    MPIReceiveStations: collects subbands from
+                                                      multiple stations
+

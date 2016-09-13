@@ -1,0 +1,30 @@
+#!/bin/sh
+
+# Parsets to use
+PARSETS="
+RTCP_UnitTest.parset.77_Stations
+RTCP_UnitTest.parset.AARTFAAC
+RTCP_UnitTest.parset.small-test
+"
+
+# Check for GPU
+if ! lspci | grep -E "VGA|3D" | grep -E "ATI|NVIDIA"
+then
+  echo "No ATI/NVIDIA graphics cards detected on host `hostname`" \
+       "-- aborting test." >&2
+  exit 3
+fi
+
+STATUS=0
+for PARSET in $PARSETS
+do
+  echo "Running ./RTCP_UnitTest $PARSET" >&2
+  ./RTCP_UnitTest $PARSET
+  if [ $? != 0 ]
+  then
+    STATUS=1
+    echo "FAILED: ./RTCP_UnitTest $PARSET" >&2
+  fi
+done
+
+exit $STATUS

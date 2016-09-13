@@ -1,0 +1,13 @@
+Observation.subbandList		= [384]
+Observation.nyquistZone		= 1
+Observation.sampleClock		= 160
+Observation.channelsPerSubband	= 256
+OLAP.CNProc.nrPPFTaps		= 16
+Observation.nrPolarisations	= 2
+OLAP.CNProc.inputPsets		= []
+OLAP.CNProc.outputPsets	        = [0]
+OLAP.storageStationNames	= ["S0", "S1", "S2", "S3", "S4", "S5"]
+OLAP.IONProc.useGather		= T
+OLAP.subbandsPerPset		= 1
+OLAP.CNProc.integrationSteps	= 608
+OLAP.delayCompensation		= T

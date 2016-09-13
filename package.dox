@@ -1,0 +1,11 @@
+/**
+
+\ingroup LOFAR
+\defgroup RTCP Real-Time Central Processing
+
+Real-Time Central Processing (RTCP) contains the software packages that are
+responsible for the real-time processing of %LOFAR data that arrives at the
+central processor from the different %LOFAR stations. This can be, e.g.,
+correlation for the Standard Imaging mode, or beam-forming for the Pulsar mode.
+
+*/

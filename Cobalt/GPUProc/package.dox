@@ -1,0 +1,10 @@
+/**
+
+\ingroup Cobalt
+\defgroup GPUProc GPU Processing
+
+Code for the new correlator and beam-former, which run on a compute cluster
+equipped with GPU cards. This packages will eventually replace the RTCP
+packages that contain software for the on-line processing on the BlueGene/P.
+
+*/

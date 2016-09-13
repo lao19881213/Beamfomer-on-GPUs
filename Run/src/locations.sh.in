@@ -1,0 +1,143 @@
+function isproduction() {
+  [ "lofarsys" == "$USER" ]
+}
+
+TIMESTAMP=`date +%Y-%m-%d_%H%M%S`
+
+if [ -z "$LOFARROOT" ]
+then
+  LOFARROOT=/opt/lofar
+fi
+
+if [ -z "$OBSID" ]
+then
+  OBSID='${OBSID}'
+fi
+
+ETCDIR=$LOFARROOT/etc
+
+source $ETCDIR/BlueGeneControl.conf
+
+if isproduction
+then
+  ISPRODUCTION=1
+
+  if [ "`basename $HOME`" == "lofartest" ]
+  then
+    ISTESTENV=1
+    STORAGE_HOME=/data/home/lofartest
+    OTDB_HOST=sasdbtest
+
+    IONPROC_PARSET="/bghome0/lofarsys/parsets/T$OBSID.parset"
+    STORAGE_PARSET="/globalhome/lofartest/log/T$OBSID.parset"
+    LOGPARAMS="-s `CEPlogProcessorSettings | awk '/test/ { print $2; }'`"
+  else
+    ISTESTENV=0
+    STORAGE_HOME=/data/home/lofarsys
+    OTDB_HOST=sasdb
+
+    IONPROC_PARSET="/bghome0/lofarsys/parsets/L$OBSID.parset"
+    STORAGE_PARSET="/globalhome/lofarsystem/log/L$OBSID.parset"
+    LOGPARAMS="-s `CEPlogProcessorSettings | awk '/production/ { print $2; }'`"
+  fi
+
+  CNPROC=$HOME/production/lofar/bgp_cn/bin/CN_Processing
+  IONPROC=$HOME/production/lofar/bgp_ion/bin/ION_Processing
+  STORAGE=$STORAGE_HOME/production/lofar/bin/Storage_main
+  FINALMETADATAGATHERER=$STORAGE_HOME/production/lofar/bin/FinalMetaDataGatherer
+
+  LOGDIR=/localhome/log
+  RUNDIR=$HOME
+  LOGBACKUPDIR=$HOME/log-archive
+
+  EXTRA_KEYS="
+OLAP.Storage.userName = lofarsys
+OLAP.Storage.sshIdentityFile = /root/.ssh/id_rsa.lofarsys
+OLAP.Storage.msWriter=$STORAGE
+OLAP.Storage.AntennaSetsConf = $STORAGE_HOME/production/lofar/etc/AntennaSets.conf
+OLAP.Storage.AntennaFieldsDir = $STORAGE_HOME/production/lofar/etc/StaticMetaData
+OLAP.Storage.HBADeltasDir = $STORAGE_HOME/production/lofar/etc/StaticMetaData
+
+OLAP.FinalMetaDataGatherer.host = lhn001
+OLAP.FinalMetaDataGatherer.userName = lofarsys
+OLAP.FinalMetaDataGatherer.sshIdentityFile = /root/.ssh/id_rsa.lofarsys
+OLAP.FinalMetaDataGatherer.executable = LD_LIBRARY_PATH= $FINALMETADATAGATHERER
+
+OLAP.FinalMetaDataGatherer.database.host = $OTDB_HOST
+
+OLAP.CNProc.partition = $PARTITION
+  "
+else
+  ISPRODUCTION=0
+
+  CNPROC=$HOME/projects/LOFAR/installed/bgpcn_opt/bin/CN_Processing
+  IONPROC=$HOME/projects/LOFAR/installed/bgpion_opt/bin/ION_Processing
+  STORAGE=$HOME/projects/LOFAR/installed/gnu_opt/bin/Storage_main
+  FINALMETADATAGATHERER=$HOME/projects/LOFAR/installed/gnu_opt/bin/FinalMetaDataGatherer
+
+  LOGDIR=$HOME/projects/LOFAR/log
+  RUNDIR=$LOGDIR
+  LOGBACKUPDIR=$LOGDIR
+  LOGPARAMS="-v"
+
+  IONPROC_PARSET="$LOGDIR/L$OBSID.parset"
+  EXTRA_KEYS="
+OLAP.Storage.userName = $USER
+OLAP.Storage.sshIdentityFile = $HOME/id_rsa
+OLAP.Storage.msWriter = $STORAGE
+OLAP.Storage.AntennaSetsConf = /data/home/lofarsys/production/lofar/etc/AntennaSets.conf
+OLAP.Storage.AntennaFieldsDir = /data/home/lofarsys/production/lofar/etc/StaticMetaData
+OLAP.Storage.HBADeltasDir = /data/home/lofarsys/production/lofar/etc/StaticMetaData
+
+OLAP.FinalMetaDataGatherer.host = lhn001
+OLAP.FinalMetaDataGatherer.userName = $USER
+OLAP.FinalMetaDataGatherer.sshIdentityFile = $HOME/id_rsa
+OLAP.FinalMetaDataGatherer.executable = LD_LIBRARY_PATH= $FINALMETADATAGATHERER
+
+OLAP.FinalMetaDataGatherer.database.host = sasdb
+
+OLAP.CNProc.partition = $PARTITION
+  "
+fi
+
+
+function set_psetinfo() {
+  if [ "$PARTITION" == "LOFARTEST" ]
+  then
+    PSETS="10.170.1.1,10.170.1.33"
+    FIRSTPSET="10.170.1.1"
+
+    return
+  fi
+  if [ "$PARTITION" == "R01-M0-N00-J00-16" ]
+  then
+    PSETS="10.170.1.1"
+    FIRSTPSET="10.170.1.1"
+
+    return
+  fi
+  if [ "$PARTITION" == "R01-M0-N00-32" ]
+  then
+    PSETS="10.170.1.1,10.170.1.2"
+    FIRSTPSET="10.170.1.1"
+
+    return
+  fi
+
+  # list both the partition directly (small partitions) and recursively (large partitions) to get all -32 subpartitions
+  # bghierarchy needs a valid stdin for some reason and will read from it, so provide a fake one
+  if [ "$PARTITION" == "R00R01" ]
+  then
+    SUBPARTITIONS="`(cd /;bghierarchy -s R00 R01;bghierarchy -s \`bghierarchy -s R00 R01\`) </dev/null`"
+  else
+    SUBPARTITIONS="`(cd /;bghierarchy -s $PARTITION;bghierarchy -s \`bghierarchy -s $PARTITION\`) </dev/null`"
+  fi  
+
+  # a comma-separated list of all psets in $PARTITION
+  # xxx-32 means both xxx-J00 and xxx-J01
+  PSETS=`for i in $SUBPARTITIONS; do echo $i; done|grep -- "-32$"|sort -u|sed 's/-32$/-J00/;p;s/-J00$/-J01/'|xargs -L 1 host -4|cut -d\  -f 4|tr '\n' ','`
+
+  # the address of the first pset in the $PARTITION
+  FIRSTPSET=`for i in $SUBPARTITIONS; do echo $i; done|grep -- "-32$"|sort -u|sed 's/-32$/-J00/;p;s/-J00$/-J01/'|xargs -L 1 host -4|cut -d\  -f 4|head -n 1`
+}
+

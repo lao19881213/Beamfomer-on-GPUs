@@ -1,0 +1,55 @@
+#!/bin/bash
+#
+# Test whether all parsets in tProductionParsets.in_parsets
+# are accepted by runObservation.sh. Does not:
+#
+#   * process blocks
+#   * read input from stations
+#   * write output
+#
+# Note: production parsets are stored by OnlineControl as
+#       /opt/lofar/var/run/CorrProc_$OBSID.param
+
+. $srcdir/testFuncs.sh
+
+# Check for GPU
+haveGPU || exit 3
+
+# Create and use LOFARROOT environment
+mklofarroot tProductionParsets_tmp.lofarroot
+
+# The directory containing the parsets to test
+PARSETDIR=$testdir/tProductionParsets.in_parsets
+
+# Copy extra parsets to test
+cp $srcdir/../etc/default.parset $PARSETDIR
+
+for PARSET in $PARSETDIR/*
+do
+  echo "****** Testing parset `basename "$PARSET"` ******"
+
+  # Reduce the run time to zero
+  echo "Observation.startTime = 2013-01-01 00:00:00" >> $PARSET
+  echo "Observation.stopTime  = 2013-01-01 00:00:00" >> $PARSET
+
+  # Prevent input from being read
+  sed -i 's/RSP.ports = .*/RSP.ports = [4*null:]/' $PARSET
+
+  # Prevent output from being written
+  echo "Observation.DataProducts.Output_Correlated.filenames=[488*/dev/null]" >> $PARSET
+  echo "Observation.DataProducts.Output_Correlated.locations=[488*:.]" >> $PARSET
+  echo "Observation.DataProducts.Output_Beamformed.filenames=[500*/dev/null]" >> $PARSET
+  echo "Observation.DataProducts.Output_Beamformed.locations=[500*:.]" >> $PARSET
+
+  # Run the observation
+  timeout 90s runObservation.sh -F -l 1 $PARSET
+  OBSRESULT=$?
+
+  if [ $OBSRESULT -gt 0 ]; then
+    exit $OBSRESULT
+  fi
+done
+
+# Everything went ok
+exit 0
+

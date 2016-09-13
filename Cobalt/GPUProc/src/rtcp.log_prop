@@ -1,0 +1,41 @@
+
+# Configure the loggers
+# TODO: rtcp currently crashes randomly with a segmentation fault when
+# logging to the MACCLP socket appender.
+#log4cplus.rootLogger=INFO, STDOUT, MACCLP
+log4cplus.rootLogger=INFO, STDOUT
+log4cplus.logger.TRC=INFO
+
+# prevent debug messages: accept >=WARN only, and don't forward messages to the rootLogger
+log4cplus.logger.LCS.ApplCommon=WARN, STDOUT
+log4cplus.additivity.LCS.ApplCommon=false
+log4cplus.logger.LCS.MSLofar=WARN, STDOUT
+log4cplus.additivity.LCS.MSLofar=false
+
+# Logging to console
+log4cplus.appender.STDOUT=log4cplus::ConsoleAppender
+log4cplus.appender.STDOUT.layout=log4cplus::PatternLayout
+log4cplus.appender.STDOUT.layout.ConversionPattern=rtcp:${MPIRANK}@%h %D{%d-%m-%y %H:%M:%S.%q} %-5p %c{3} - %m [%b:%L]%n
+
+# Logging to logging server on CCU001
+# HERE BE DRAGONS: Do NOT set the logging threshold for the MACCLP appender
+# above INFO in the log_prop file, or identification with the MAC Log Processor
+# will fail!
+log4cplus.appender.MACCLP=log4cplus::SocketAppender
+log4cplus.appender.MACCLP.port=23999
+log4cplus.appender.MACCLP.host=ccu001
+log4cplus.appender.MACCLP.Threshold=INFO
+
+#log4cplus.appender.STDERR=log4cplus::ConsoleAppender
+#log4cplus.appender.STDERR.layout=log4cplus::PatternLayout
+#log4cplus.appender.STDERR.layout.ConversionPattern=rtcp:${MPIRANK}@%h %D{%d-%m-%y %H:%M:%S.%q} %-5p %c{3} - %m [%b:%L]%n
+#log4cplus.appender.STDERR.logToStdErr=true
+
+#log4cplus.appender.FILE=log4cplus::RollingFileAppender
+#log4cplus.appender.FILE.File=${LOG4CPLUS_LOGFILENAME}.log
+#log4cplus.appender.FILE.MaxFileSize=10MB
+#log4cplus.appender.FILE.MaxBackupIndex=2
+#log4cplus.appender.FILE.layout=log4cplus::PatternLayout
+#log4cplus.appender.FILE.layout.ConversionPattern=rtcp:${MPIRANK}@%h %D{%d-%m-%y %H:%M:%S.%q} %-5p %c{3} - %m [%b:%L]%n
+
+log4cplus.appender.DUMP=log4cplus::NullAppender

@@ -1,0 +1,7 @@
+StartTime = 2011/05/15/16:59:08.0 
+EndTime = 2011/05/21/22:59:06.0
+BrokenTilesFile = brokenTilesFile
+FailedTilesFile = failedTilesFile
+host = RS005.astron.nl
+db = TESTLOFAR_4
+port = 5432

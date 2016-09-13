@@ -1,0 +1,37 @@
+Cobalt.correctBandPass			 = F
+Cobalt.delayCompensation		 = F
+Observation.sampleClock			 = 200
+Observation.nrBitsPerSample  = 16
+Cobalt.blockSize             = 65536
+
+Observation.VirtualInstrument.stationList = [CS002]
+Observation.antennaSet = HBA_DUAL
+Observation.nrBeams                      = 1
+Observation.Beam[0].subbandList	         = [300]
+Observation.Beam[0].nrTiedArrayBeams     = 1
+Observation.Beam[0].TiedArrayBeam[0].angle1 = 0
+Observation.Beam[0].TiedArrayBeam[0].angle2 = 0
+Observation.Beam[0].TiedArrayBeam[0].coherent = F
+
+OLAP.CNProc_CoherentStokes.which	 = I # IQUV
+OLAP.CNProc_CoherentStokes.timeIntegrationFactor = 1
+OLAP.CNProc_CoherentStokes.channelsPerSubband = 1
+OLAP.CNProc_IncoherentStokes.which	 = I # IQUV
+OLAP.CNProc_IncoherentStokes.timeIntegrationFactor = 1
+OLAP.CNProc_IncoherentStokes.channelsPerSubband = 1
+Observation.rspBoardList                 = [0]
+Observation.rspSlotList                  = [0]
+
+Observation.DataProducts.Output_Beamformed.enabled=true
+Observation.DataProducts.Output_Beamformed.filenames=[tab0.raw]
+Observation.DataProducts.Output_Beamformed.locations=[1*:.]
+
+Cobalt.Kernels.BeamFormerKernel.dumpOutput = true
+Cobalt.Kernels.BeamFormerTransposeKernel.dumpOutput = true
+Cobalt.Kernels.CoherentStokesKernel.dumpOutput = true
+Cobalt.Kernels.DelayAndBandPassKernel.dumpOutput = true
+Cobalt.Kernels.FFT_Kernel.dumpOutput = true
+Cobalt.Kernels.FIR_FilterKernel.dumpOutput = true
+Cobalt.Kernels.IncoherentStokesKernel.dumpOutput = true
+Cobalt.Kernels.IncoherentStokesTransposeKernel.dumpOutput = true
+Cobalt.Kernels.IntToFloatKernel.dumpOutput = true

@@ -1,0 +1,65 @@
+# See skampi_pt2pt.ski for installation and environment details
+# Single node run
+#/opt/openmpi/bin/mpirun -H cbm009 bash -l -c "./skampi -i /globalhome/klijn/temp/skampi-5.0.4-r0355/ski/skampi_coll.ski -o /globalhome/klijn/temp/skampi-5.0.4-r0355/ski/skampi_col_full_cluster.sko"
+# all nodes 2 proc run
+#/opt/openmpi/bin/mpirun -H cbm001,cbm002,cbm003,cbm004,cbm005,cbm006,cbm007,cbm008,cbm009,cbm001,cbm002,cbm003,cbm004,cbm005,cbm006,cbm007,cbm008,cbm009 bash -l -c "./skampi -i /globalhome/klijn/temp/skampi-5.0.4-r0355/ski/skampi_coll.ski -o /globalhome/klijn/temp/skampi-5.0.4-r0355/ski/skampi_coll_full_cluster.sko"
+# warning this this might run for more then an hour depending on the amount of nodes selected
+
+
+set_min_repetitions(100)
+set_max_repetitions(100)
+
+set_max_relative_standard_error(0.03)
+set_max_nr_node_times(4)
+
+# Increased buffer size to be not allowed by this limit
+set_skampi_buffer(200MB)
+
+# Set datatype to char to get reports in bytes/message
+datatype = MPI_CHAR
+
+num_procs = get_np()
+comm_all = comm(num_procs)
+
+idx_start = 100000
+idx_end =  2650000  # 2.65 mb  size
+idx_step =  100000
+
+max_count = 100
+
+# start the four all to all test scanning the two available dimension (nprocs and the size of the messages)
+begin measurement "MPI_Alltoall-procs-scan"
+for procs = 2 to num_procs do
+    for count = idx_start to idx_end  step idx_step do
+    		measure comm(procs) : Alltoall(count, datatype, count, datatype)
+    od
+od
+end measurement
+
+
+begin measurement "Alltoall_using_Isend_Irecv-procs-scan"
+for procs = 2 to num_procs do
+   for count = idx_start to idx_end  step idx_step do
+
+      measure comm(procs) : Alltoall_using_Isend_Irecv(count, datatype, count, datatype)
+   od
+od
+end measurement
+
+
+begin measurement "MPI_Alltoallv-procs-scan"
+for procs = 2 to num_procs do
+   for count = idx_start to idx_end  step idx_step do
+      measure comm(procs) : Alltoallv(count, datatype, count, datatype)
+   od
+od
+end measurement
+
+begin measurement "Alltoallv_using_Isend_Irecv-procs-short"
+for procs = 2 to num_procs do
+   for count = idx_start to idx_end  step idx_step do
+      measure comm(procs) : Alltoallv_using_Isend_Irecv(count, datatype, count, datatype)
+   od
+od
+end measurement
+

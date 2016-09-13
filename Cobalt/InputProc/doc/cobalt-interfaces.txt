@@ -1,0 +1,74 @@
+Generic configuration:
+---------------------------
+eth0: GbE
+eth2: 10 GbE, CPU 0
+eth3: 10 GbE, CPU 0
+eth4: 10 GbE, CPU 1
+eth5: 10 GbE, CPU 1
+
+Specific configuration:
+---------------------------
+
+cbt001:
+eth0: ether 90:b1:1c:4e:05:1e inet 10.149.128.1/13
+eth2: ether a0:36:9f:1f:78:a4 inet 10.168.96.1/13
+eth3: ether a0:36:9f:1f:78:a6 inet 10.168.96.2/13
+eth4: ether a0:36:9f:1f:7b:44 inet 10.168.96.3/13
+eth5: ether a0:36:9f:1f:7b:46 inet 10.168.96.4/13
+
+cbt002:
+eth0: ether 90:b1:1c:4e:01:99 inet 10.149.128.2/13
+eth2: ether a0:36:9f:1f:73:40 inet 10.168.97.1/13
+eth3: ether a0:36:9f:1f:73:42 inet 10.168.97.2/13
+eth4: ether a0:36:9f:1f:79:a0 inet 10.168.97.3/13
+eth5: ether a0:36:9f:1f:79:a2 inet 10.168.97.4/13
+
+cbt003:
+eth0: ether 90:b1:1c:4e:0a:d0 inet 10.149.128.3/13
+eth2: ether a0:36:9f:1f:78:0c inet 10.168.98.1/13
+eth3: ether a0:36:9f:1f:78:0e inet 10.168.98.2/13
+eth4: ether a0:36:9f:1f:7b:40 inet 10.168.98.3/13
+eth5: ether a0:36:9f:1f:7b:42 inet 10.168.98.4/13
+
+cbt004:
+eth0: ether 90:b1:1c:4d:f2:09 inet 10.149.128.4/13
+eth2: ether a0:36:9f:1f:79:94 inet 10.168.99.1/13
+eth3: ether a0:36:9f:1f:79:96 inet 10.168.99.2/13
+eth4: ether a0:36:9f:1f:7a:04 inet 10.168.99.3/13
+eth5: ether a0:36:9f:1f:7a:06 inet 10.168.99.4/13
+
+cbt005:
+eth0: ether 90:b1:1c:4d:fe:8c inet 10.149.128.5/13
+eth2: ether a0:36:9f:1f:7b:74 inet 10.168.100.1/13
+eth3: ether a0:36:9f:1f:7b:76 inet 10.168.100.2/13
+eth4: ether a0:36:9f:1f:79:e0 inet 10.168.100.3/13
+eth5: ether a0:36:9f:1f:79:e2 inet 10.168.100.4/13
+
+cbt006:
+eth0: ether 90:b1:1c:4e:07:a3 inet 10.149.128.6/13
+eth2: ether a0:36:9f:1f:79:a4 inet 10.168.101.1/13
+eth3: ether a0:36:9f:1f:79:a6 inet 10.168.101.2/13
+eth4: ether a0:36:9f:1f:7a:34 inet 10.168.101.3/13
+eth5: ether a0:36:9f:1f:7a:36 inet 10.168.101.4/13
+
+cbt007:
+eth0: ether 90:b1:1c:4d:ff:98 inet 10.149.128.7/13
+eth2: ether a0:36:9f:1f:79:04 inet 10.168.102.1/13
+eth3: ether a0:36:9f:1f:79:06 inet 10.168.102.2/13
+eth4: ether a0:36:9f:1f:78:64 inet 10.168.102.3/13
+eth5: ether a0:36:9f:1f:78:66 inet 10.168.102.4/13
+
+cbt008:
+eth0: ether 90:b1:1c:39:6e:77 inet 10.149.128.8/13
+eth2: ether a0:36:9f:1f:79:00 inet 10.168.103.1/13
+eth3: ether a0:36:9f:1f:79:02 inet 10.168.103.2/13
+eth4: ether a0:36:9f:1f:7b:68 inet 10.168.103.3/13
+eth5: ether a0:36:9f:1f:7b:6a inet 10.168.103.4/13
+
+cbt009:
+eth0: ether 90:b1:1c:4d:fc:47 inet 10.149.128.9/13
+eth2: ether a0:36:9f:1f:36:e4 inet 10.168.104.1/13
+eth3: ether a0:36:9f:1f:36:e6 inet 10.168.104.2/13
+eth4: ether a0:36:9f:1f:7b:3c inet 10.168.104.3/13
+eth5: ether a0:36:9f:1f:7b:3e inet 10.168.104.4/13
+

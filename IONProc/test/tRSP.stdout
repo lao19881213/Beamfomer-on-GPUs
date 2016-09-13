@@ -1,0 +1,20 @@
+---- Checking tRSP.in_16bit
+RSP version:  3
+RSP board nr: 0
+Payload OK:   YES
+Clock:        200 MHz
+Bit mode:     16 bit
+Blocks:       16
+Beamlets:     61
+Sample 4 of beamlet 2:  X = (-6,-20)
+Sample 4 of beamlet 2:  Y = (-18,-41)
+---- Checking tRSP.in_8bit
+RSP version:  3
+RSP board nr: 1
+Payload OK:   YES
+Clock:        200 MHz
+Bit mode:     8 bit
+Blocks:       16
+Beamlets:     122
+Sample 4 of beamlet 2:  X = (3,0)
+Sample 4 of beamlet 2:  Y = (0,0)

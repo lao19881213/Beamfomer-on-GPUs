@@ -1,0 +1,8 @@
+/**
+
+\ingroup Cobalt
+\defgroup CoInterface Cobalt Interface
+
+Classes and interface definitions used by the different Cobalt packages.
+
+*/

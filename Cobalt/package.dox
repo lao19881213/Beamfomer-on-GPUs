@@ -1,0 +1,8 @@
+/**
+
+\ingroup RTCP
+\defgroup Cobalt Cobalt
+
+Project area for the new GPU based correlator and beam-former.
+
+*/

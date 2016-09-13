@@ -1,0 +1,17 @@
+OLAP.CNProc.integrationSteps		 = 1536
+OLAP.CNProc.dedispersionFFTsize          = 1536
+OLAP.correctBandPass			 = T
+OLAP.nrBitsPerSample			 = 8
+OLAP.CNProc.nrPPFTaps			 = 16
+OLAP.storageStationNames		 = [CS002D00,CS002D01,CS002D02,CS002D03,CS002D04,CS002D05,CS002D06,CS002D07]
+Observation.Beam[0].nrTiedArrayBeams 	 = 0
+OLAP.CNProc_CoherentStokes.timeIntegrationFactor = 1
+OLAP.CNProc_IncoherentStokes.timeIntegrationFactor = 1
+OLAP.CNProc_CoherentStokes.which	 = I # IQUV
+OLAP.CNProc_IncoherentStokes.which	 = I # IQUV
+OLAP.delayCompensation			 = T
+Observation.nrPolarisations		 = 2
+Observation.subbandList			 = [300..309]
+Observation.beamList			 = [10*0]
+Observation.channelsPerSubband		 = 64
+Observation.sampleClock			 = 200

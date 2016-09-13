@@ -1,0 +1,5 @@
+#!/bin/sh
+
+. $srcdir/../testFuncs.sh
+haveGPU || exit 3
+./tContext || exit $?

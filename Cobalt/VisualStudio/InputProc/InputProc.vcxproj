@@ -1,0 +1,133 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{075D5E72-BA47-4D6E-B1E1-DBCF747CA33D}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>InputProc</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;..\..\..\static_fixture;..\..\;..\symbolic_links;C:\Program Files (x86)\boost\boost_1_41</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\InputProc\src\Buffer\Block.h" />
+    <ClInclude Include="..\..\InputProc\src\Buffer\BlockReader.h" />
+    <ClInclude Include="..\..\InputProc\src\Buffer\BoardMode.h" />
+    <ClInclude Include="..\..\InputProc\src\Buffer\BufferSettings.h" />
+    <ClInclude Include="..\..\InputProc\src\Buffer\Ranges.h" />
+    <ClInclude Include="..\..\InputProc\src\Buffer\SampleBuffer.h" />
+    <ClInclude Include="..\..\InputProc\src\Buffer\SharedMemory.h" />
+    <ClInclude Include="..\..\InputProc\src\Buffer\StationID.h" />
+    <ClInclude Include="..\..\InputProc\src\obsolete\MPI_RMA.h" />
+    <ClInclude Include="..\..\InputProc\src\obsolete\Poll.h" />
+    <ClInclude Include="..\..\InputProc\src\obsolete\TimeSync.h" />
+    <ClInclude Include="..\..\InputProc\src\OMPThread.h" />
+    <ClInclude Include="..\..\InputProc\src\RSPBoards.h" />
+    <ClInclude Include="..\..\InputProc\src\SampleType.h" />
+    <ClInclude Include="..\..\InputProc\src\Station\Generator.h" />
+    <ClInclude Include="..\..\InputProc\src\Station\PacketReader.h" />
+    <ClInclude Include="..\..\InputProc\src\Station\PacketsToBuffer.h" />
+    <ClInclude Include="..\..\InputProc\src\Station\PacketWriter.h" />
+    <ClInclude Include="..\..\InputProc\src\Station\RSP.h" />
+    <ClInclude Include="..\..\InputProc\src\Transpose\MapUtil.h" />
+    <ClInclude Include="..\..\InputProc\src\Transpose\MPIProtocol.h" />
+    <ClInclude Include="..\..\InputProc\src\Transpose\MPIReceiveStations.h" />
+    <ClInclude Include="..\..\InputProc\src\Transpose\MPISendStation.h" />
+    <ClInclude Include="..\..\InputProc\src\Transpose\MPITransferStations.h" />
+    <ClInclude Include="..\..\InputProc\src\Transpose\MPIUtil.h" />
+    <ClInclude Include="..\..\InputProc\src\Transpose\ReceiveStations.h" />
+    <ClInclude Include="..\..\InputProc\src\WallClockTime.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\InputProc\src\Buffer\BufferSettings.cc" />
+    <ClCompile Include="..\..\InputProc\src\Buffer\Ranges.cc" />
+    <ClCompile Include="..\..\InputProc\src\Buffer\SampleBuffer.cc" />
+    <ClCompile Include="..\..\InputProc\src\Buffer\SharedMemory.cc" />
+    <ClCompile Include="..\..\InputProc\src\Buffer\StationID.cc" />
+    <ClCompile Include="..\..\InputProc\src\newInputSection.cc" />
+    <ClCompile Include="..\..\InputProc\src\RSPBoards.cc" />
+    <ClCompile Include="..\..\InputProc\src\Station\filterRSP.cc" />
+    <ClCompile Include="..\..\InputProc\src\Station\Generator.cc" />
+    <ClCompile Include="..\..\InputProc\src\Station\PacketReader.cc" />
+    <ClCompile Include="..\..\InputProc\src\Station\PacketsToBuffer.cc" />
+    <ClCompile Include="..\..\InputProc\src\Transpose\MPIReceiveStations.cc" />
+    <ClCompile Include="..\..\InputProc\src\Transpose\MPISendStation.cc" />
+    <ClCompile Include="..\..\InputProc\src\Transpose\MPIUtil.cc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\InputProc\src\Buffer\Block.tcc" />
+    <None Include="..\..\InputProc\src\Buffer\BlockReader.tcc" />
+    <None Include="..\..\InputProc\src\Buffer\SampleBuffer.tcc" />
+    <None Include="..\..\InputProc\src\CMakeLists.txt" />
+    <None Include="..\..\InputProc\src\Station\PacketWriter.tcc" />
+    <None Include="..\..\InputProc\src\Transpose\MPITransferStations.tcc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

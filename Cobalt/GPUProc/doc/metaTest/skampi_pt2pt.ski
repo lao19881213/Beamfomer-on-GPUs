@@ -1,0 +1,100 @@
+# ----------------------------------------------------------------------
+# This is a SKaMPI config file for testing the MPI configuration of the Cobalt cluster
+# SKaMPI Version 5.0.4 rev. 355
+# 
+#
+# pt2pt measurements
+# To run:
+# 1 Download SKaMPI 
+#       http://liinwww.ira.uka.de/~skampi/
+# 2 set up environement
+#      export LD_LIBRARY_PATH=/opt/openmpi/lib:$LD_LIBRARY_PATH
+#      export PATH=/opt/openmpi/bin:$PATH
+# 3. Install SKaMPI
+# 4. Run using following example commands:     
+#                single proc per node:
+#                /opt/openmpi/bin/mpirun -H cbm001,cbm002,cbm003,cbm004,cbm005,cbm006,cbm007,cbm008,cbm009 bash -l -c "./skampi -i /globalhome/klijn/temp/skampi-5.0.4-r0355/ski/skampi_pt2pt.ski -o /globalhome/klijn/temp/skampi-5.0.4-r0355/ski/skampi_pt2pt_full_cluster.sko"
+#                dual proc per node:
+#                /opt/openmpi/bin/mpirun -H cbm001,cbm002,cbm003,cbm004,cbm005,cbm006,cbm007,cbm008,cbm009,cbm001,cbm002,cbm003,cbm004,cbm005,cbm006,cbm007,cbm008,cbm009 bash -l -c "./skampi -i /globalhome/klijn/temp/skampi-5.0.4-r0355/ski/skampi_pt2pt.ski -o /globalhome/klijn/temp/skampi-5.0.4-r0355/ski/skampi_pt2pt_full_cluster.sko"
+
+set_min_repetitions(100)
+set_max_repetitions(100)
+set_max_relative_standard_error(0.03)
+set_max_nr_node_times(4)
+
+# Increased buffer size to be not allowed by this limit
+set_skampi_buffer(20mb)
+
+# Set datatype to char to get reports in bytes/message
+datatype = MPI_CHAR
+
+idx_start = 100000
+idx_end =  2650000  # 2.65 mb  size
+idx_step =  100000
+
+max_count = 100
+
+# ----------------------------------------------------------------------
+
+comm_pt2pt = comm2_max_latency_with_root()
+
+begin measurement "Pingpong_Send_Recv"
+   for count = idx_start to idx_end  step idx_step do
+      measure comm_pt2pt : Pingpong_Send_Recv(count, datatype, 0, 1)
+   od
+end measurement 
+
+begin measurement "Pingpong_Send_Iprobe_Recv"
+   for count = idx_start to idx_end step idx_step do
+      measure comm_pt2pt : Pingpong_Send_Iprobe_Recv(count, datatype, 0, 1)
+   od
+end measurement 
+
+begin measurement "Pingpong_Send_Irecv"
+   for count = idx_start to idx_end step idx_step do
+      measure comm_pt2pt : Pingpong_Send_Irecv(count, datatype, 0, 1)
+   od
+end measurement 
+
+begin measurement "Pingpong_Send_Recv_AnyTag"
+   for count = idx_start to idx_end step idx_step do
+      measure comm_pt2pt : Pingpong_Send_Recv_AT(count, datatype, 0, 1)
+   od
+end measurement 
+
+begin measurement "Pingpong_Ssend_Recv"
+   for count = idx_start to idx_end step idx_step do
+      measure comm_pt2pt : Pingpong_Ssend_Recv(count, datatype, 0, 1)
+   od
+end measurement 
+
+begin measurement "Pingpong_Isend_Recv"
+   for count = idx_start to idx_end step idx_step do
+      measure comm_pt2pt : Pingpong_Isend_Recv(count, datatype, 0, 1)
+   od
+end measurement 
+
+begin measurement "Pingpong_Issend_Recv"
+   for count = idx_start to idx_end step idx_step do
+      measure comm_pt2pt : Pingpong_Issend_Recv(count, datatype, 0, 1)
+   od
+end measurement 
+
+# problems with "No buffer space available" 
+# begin measurement "Pingpong_Bsend_Recv"
+#    for count = 1 to idx_end step idx_step do
+#       measure comm_pt2pt : Pingpong_Bsend_Recv(count, datatype, 0, 1)
+#    od
+# end measurement 
+
+begin measurement "Pingpong_Sendrecv"
+   for count = idx_start to idx_end step idx_step do
+      measure comm_pt2pt : Pingpong_Sendrecv(count, datatype, 0, count, datatype, 0, 1)
+   od
+end measurement 
+
+begin measurement "Pingpong_Sendrecv_replace"
+   for count = idx_start to idx_end step idx_step do
+      measure comm_pt2pt : Pingpong_Sendrecv_replace(count, datatype, 0, 0, 1)
+   od
+end measurement 

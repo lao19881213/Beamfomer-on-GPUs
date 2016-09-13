@@ -1,0 +1,9 @@
+/**
+
+\ingroup Cobalt
+\defgroup OpenCL_FFT OpenCL FFT
+
+Apple's FFT library for OpenCL
+
+*/
+

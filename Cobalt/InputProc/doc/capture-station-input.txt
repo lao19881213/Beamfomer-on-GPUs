@@ -1,0 +1,65 @@
+To capture station input, one needs to set up a receiver per RSP board:
+
+1. Find out where each station sends its data to. Each antenna field
+   has 4 UDP data streams:
+
+2. If needed, configure where the stations send their data:
+     a. On the stations, /opt/lofar/etc/RSPDriver.conf configures
+        where the station sends data to.
+     b. Set/check the keys
+          RSPDriver.LANE_00_DSTMAC  = 00:14:5E:7D:95:F1   # R00-M1-N04-J01
+          RSPDriver.LANE_00_DSTIP   = 10.170.0.146
+          RSPDriver.LANE_00_DSTPORT = 4346
+        The port key is very recent, and optional:
+           i. In Cobalt, the data is sent to ports
+                10000 + (stationNr * 10) + boardNr
+              In BG/P, the port numbers are
+                4643 + boardNr
+              the latter is also the default value.
+           ii. The following boardNrs are used:
+                input:    fields:           boardNrs:
+                0         LBA, HBA, HBA0    0, 1, 2, 3
+                1         HBA1              6, 7, 8, 9
+     c. Restart the RSPDriver.
+
+3. Build the Run package, which contains Run/src/tools/udp-copy.c
+
+4. Run udp-copy per board on the node that receives that stations
+   data, f.e.:
+     udp-copy udp:0.0.0.0:13050 file:RS305-RSP0.raw.udp &
+     udp-copy udp:0.0.0.0:13051 file:RS305-RSP1.raw.udp &
+     udp-copy udp:0.0.0.0:13052 file:RS305-RSP2.raw.udp &
+     udp-copy udp:0.0.0.0:13053 file:RS305-RSP3.raw.udp &
+
+     // wait for the background processes to finish
+     wait; wait; wait; wait
+
+  The following protocols are supported:
+    udp:host:port             listen for/send UDP datagrams
+    tcp:host:port             listen for/connect to TCP stream
+    file:filename             read from/write to disk
+    null:                     discard output (writes to /dev/null)
+    zero:                     generate zeroes (reads from /dev/zero)
+    stdin:/stdout:/stderr:    I/O with the standard descriptors
+
+  HINT: Optionally, pipe the output through the 'filterRSP'
+        utility found in InputProc/src/Station, to reduce the data rate
+        before sending it to disk. For example, to only save the first 22 beamlets
+        of each packet, use:
+
+     udp-copy udp:0.0.0.0:13050 stdout: | filterRSP -s 22 > RS305-RSP0.raw.udp
+
+        The same utility can be used to:
+          - filter packets between a specific start and end time
+          - filter packets with a specific bitmode or clock
+
+5. Start the observation. This can be done using the normal MoM/Scheduler route.
+   Make sure that at least one of the following holds:
+     1. Data is not sent to BG/P or Cobalt.
+     2. BG/P/Cobalt cannot be started:
+           BG/P:    go to 'swlevel 1' on bgfen0
+           Cobalt:  unknown
+     3. 'OnlineControl' is removed from the parset tree before it is sent to the MACScheduler.
+
+6. udp-copy will now transfer the stream to disk, until interrupted.
+

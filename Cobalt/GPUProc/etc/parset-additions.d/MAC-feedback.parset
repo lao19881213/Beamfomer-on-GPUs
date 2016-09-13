@@ -1,0 +1,9 @@
+# The host that is running OnlineControl
+#
+# The feedback port is derived through
+#   21000 + (Observation.ObsID % 1000)
+Cobalt.Feedback.host = ccu001.control.lofar
+
+# The remote directory in which the LTA feedback needs to be stored
+Cobalt.Feedback.remotePath = /opt/lofar/var/run
+

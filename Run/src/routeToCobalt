@@ -1,0 +1,25 @@
+#!/bin/bash
+
+CONFFILE=/opt/lofar/etc/BlueGeneControl.conf
+
+if [ "$1" == "yes" -o "$1" == "cobalt" ]
+then
+  # Route to Cobalt
+  sed -i 's/ROUTE_TO_COBALT\w*=.*$/ROUTE_TO_COBALT=1/' $CONFFILE
+elif [ "$1" == "no" -o "$1" == "BGP" ]
+then
+  # Route to BG/P
+  sed -i 's/ROUTE_TO_COBALT\w*=.*$/ROUTE_TO_COBALT=0/' $CONFFILE
+fi
+
+# Report
+source $CONFFILE
+
+if [ $ROUTE_TO_COBALT -eq 1 ]
+then
+  DEST="Cobalt"
+else
+  DEST="BG/P"
+fi
+
+echo "Observations are processed by: $DEST"

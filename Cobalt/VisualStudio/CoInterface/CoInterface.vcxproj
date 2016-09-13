@@ -1,0 +1,126 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{0C6B2AFD-61F8-4E27-BDB8-FECDA6DC04CE}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>CoInterface</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;..\..\..\static_fixture;..\..\;..\symbolic_links;C:\Program Files (x86)\boost\boost_1_41</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\CoInterface\src\Align.h" />
+    <ClInclude Include="..\..\CoInterface\src\AlignedStdAllocator.h" />
+    <ClInclude Include="..\..\CoInterface\src\Allocator.h" />
+    <ClInclude Include="..\..\CoInterface\src\BeamCoordinates.h" />
+    <ClInclude Include="..\..\CoInterface\src\BeamFormedData.h" />
+    <ClInclude Include="..\..\CoInterface\src\BGPAsm.h" />
+    <ClInclude Include="..\..\CoInterface\src\CN_Command.h" />
+    <ClInclude Include="..\..\CoInterface\src\CN_Mapping.h" />
+    <ClInclude Include="..\..\CoInterface\src\Config.h" />
+    <ClInclude Include="..\..\CoInterface\src\CorrelatedData.h" />
+    <ClInclude Include="..\..\CoInterface\src\DataFactory.h" />
+    <ClInclude Include="..\..\CoInterface\src\Exceptions.h" />
+    <ClInclude Include="..\..\CoInterface\src\FakeData.h" />
+    <ClInclude Include="..\..\CoInterface\src\FilteredData.h" />
+    <ClInclude Include="..\..\CoInterface\src\FinalMetaData.h" />
+    <ClInclude Include="..\..\CoInterface\src\InputData.h" />
+    <ClInclude Include="..\..\CoInterface\src\InverseFilteredData.h" />
+    <ClInclude Include="..\..\CoInterface\src\MultiDimArray.h" />
+    <ClInclude Include="..\..\CoInterface\src\OutputTypes.h" />
+    <ClInclude Include="..\..\CoInterface\src\Parset.h" />
+    <ClInclude Include="..\..\CoInterface\src\PrintVector.h" />
+    <ClInclude Include="..\..\CoInterface\src\RSPTimeStamp.h" />
+    <ClInclude Include="..\..\CoInterface\src\SetOperations.h" />
+    <ClInclude Include="..\..\CoInterface\src\SmartPtr.h" />
+    <ClInclude Include="..\..\CoInterface\src\SparseSet.h" />
+    <ClInclude Include="..\..\CoInterface\src\Stream.h" />
+    <ClInclude Include="..\..\CoInterface\src\StreamableData.h" />
+    <ClInclude Include="..\..\CoInterface\src\SubbandMetaData.h" />
+    <ClInclude Include="..\..\CoInterface\src\TransposedBeamFormedData.h" />
+    <ClInclude Include="..\..\CoInterface\src\TransposedData.h" />
+    <ClInclude Include="..\..\CoInterface\src\TriggerData.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\CoInterface\src\Allocator.cc" />
+    <ClCompile Include="..\..\CoInterface\src\BeamCoordinates.cc" />
+    <ClCompile Include="..\..\CoInterface\src\CN_Mapping.cc" />
+    <ClCompile Include="..\..\CoInterface\src\DataFactory.cc" />
+    <ClCompile Include="..\..\CoInterface\src\FinalMetaData.cc" />
+    <ClCompile Include="..\..\CoInterface\src\Parset.cc" />
+    <ClCompile Include="..\..\CoInterface\src\RSPTimeStamp.cc" />
+    <ClCompile Include="..\..\CoInterface\src\Stream.cc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\CoInterface\src\CMakeLists.txt" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -1,0 +1,33 @@
+#!/bin/sh
+
+#while :; do
+#    mpirun_rsh -np 16 lii001 lii001 lii002 lii003 lii004 lii004 lii005 lii006 lii007 lii007 lii008 lii009 lii010 lii010 lii011 lii012 udp-copy
+#    echo restart
+#done
+
+FILENAME=$1
+
+ssh lii001 src/udp_copy 10.161.0.1:4346 10.170.0.2:4346 </dev/null & #CS001_RSP0
+ssh lii001 src/udp_copy 10.161.0.1:4347 10.170.0.4:4347 </dev/null & #CS001_RSP1
+ssh lii002 src/udp_copy 10.161.0.2:4348 10.170.0.1:4348 </dev/null & #CS001_RSP2
+ssh lii002 src/udp_copy 10.161.0.2:4349 10.170.0.3:4349 </dev/null & #CS001_RSP3
+ssh lii003 src/udp_copy 10.161.0.3:4346 10.170.0.10:4346 </dev/null & #CS008_RSP0
+ssh lii003 src/udp_copy 10.161.0.3:4347 10.170.0.9:4347 </dev/null & #CS008_RSP1
+ssh lii004 src/udp_copy 10.161.0.4:4348 10.170.0.12:4348 </dev/null & #CS008_RSP2
+ssh lii004 src/udp_copy 10.161.0.4:4349 10.170.0.11:4349 </dev/null & #CS008_RSP3
+ssh lii005 src/udp_copy 10.161.0.5:4346 10.170.0.18:4346 </dev/null & #CS010_RSP0
+ssh lii005 src/udp_copy 10.161.0.5:4347 10.170.0.17:4347 </dev/null & #CS010_RSP1
+ssh lii006 src/udp_copy 10.161.0.6:4348 10.170.0.20:4348 </dev/null & #CS010_RSP2
+ssh lii006 src/udp_copy 10.161.0.6:4349 10.170.0.19:4349 </dev/null & #CS010_RSP3
+ssh lii007 src/udp_copy 10.161.0.7:4346 10.170.0.26:4346 </dev/null & #CS031_RSP0
+ssh lii007 src/udp_copy 10.161.0.7:4347 10.170.0.25:4347 </dev/null & #CS031_RSP1
+ssh lii008 src/udp_copy 10.161.0.8:4348 10.170.0.28:4348 </dev/null & #CS031_RSP2
+ssh lii008 src/udp_copy 10.161.0.8:4349 10.170.0.27:4349 </dev/null & #CS031_RSP3
+ssh lii009 src/udp_copy 10.161.0.9:4346 10.170.0.34:4346 </dev/null & #CS032_RSP0
+ssh lii009 src/udp_copy 10.161.0.9:4347 10.170.0.33:4347 </dev/null & #CS032_RSP1
+ssh lii010 src/udp_copy 10.161.0.10:4348 10.170.0.36:4348 </dev/null & #CS032_RSP2
+ssh lii010 src/udp_copy 10.161.0.10:4349 10.170.0.35:4349 </dev/null & #CS032_RSP3
+ssh lii011 src/udp_copy 10.161.0.11:4346 10.170.0.42:4346 </dev/null & #CS016_RSP0
+ssh lii011 src/udp_copy 10.161.0.11:4347 10.170.0.41:4347 </dev/null & #CS016_RSP1
+ssh lii012 src/udp_copy 10.161.0.12:4348 10.170.0.44:4348 </dev/null & #CS016_RSP2
+ssh lii012 src/udp_copy 10.161.0.12:4349 10.170.0.43:4349 </dev/null & #CS016_RSP3

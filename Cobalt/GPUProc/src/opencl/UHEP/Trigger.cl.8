@@ -1,0 +1,125 @@
+typedef __global struct {
+  float bestValue;
+  uint bestApproxIndex;
+} (*TriggerInfoType)[NR_TABS];
+
+typedef __global float (*InvFIRfilteredDataType)[NR_TABS][NR_POLARIZATIONS][8][32][NR_TIMES_PER_BLOCK / 2][8];
+
+
+float2 computeThreshold(__global const float *invFIRfilteredDataPtr)
+{
+  float M = 0, S = 0;
+  uint count = 0;
+
+  for (uint i = get_local_id(0); i < sizeof(InvFIRfilteredDataType) / sizeof(float); i += get_local_size(0)) {
+    ++count;
+    float sample = invFIRfilteredDataPtr[i];
+    float t = sample - M;
+    M += t / count;
+    S += t * (sample - M);
+  }
+
+  barrier(CLK_GLOBAL_MEM_FENCE);
+
+  __local float2 local_MS[256];
+
+  local_MS[get_local_id(0)] = (float2) (M, S);
+
+  for (uint i = get_local_size(0); (i >>= 1) != 0; ) {
+    barrier(CLK_LOCAL_MEM_FENCE);
+
+    if (get_local_id(0) < i)
+      local_MS[get_local_id(0)] += local_MS[get_local_id(0) + i];
+  }
+
+  if (get_local_id(0) == 0)
+    local_MS[0].y = native_sqrt(local_MS[0].y);
+
+  barrier(CLK_LOCAL_MEM_FENCE);
+  return local_MS[0];
+}
+
+
+__kernel void trigger(__global const void *triggerInfoPtr,
+                      __global const float *invFIRfilteredDataPtr)
+{
+  TriggerInfoType triggerInfo = (TriggerInfoType) triggerInfoPtr;
+  InvFIRfilteredDataType invFIRfilteredData = (InvFIRfilteredDataType) invFIRfilteredDataPtr;
+
+  uint minor = get_local_id(0);
+  uint major = get_local_id(1);
+  uint me = 8 * major + minor;
+  uint tab = get_global_id(2);
+
+  __local union {
+    float f[8][32][8];
+    float8 f8[32][8];
+    struct {
+      float values[256];
+      uint approxIndices[256];
+    } best;
+  } tmp;
+
+  float8 h0, h1, h2;
+  h1 = 0;
+  h2.s567 = 0;
+  float8 sum_0;
+  float bestValue = 0;
+  uint bestApproxIndex = 0;
+
+  for (uint time = 0; time < 1024 * NR_TIMES_PER_BLOCK / 2048; time++) {
+    for (uint i = 0; i < 8; i++) {
+      float sampleX = (*invFIRfilteredData)[tab][0][i][major][time][minor];
+      float sampleY = (*invFIRfilteredData)[tab][1][i][major][time][minor];
+      float power = sampleX * sampleX + sampleY * sampleY;
+      tmp.f[i][major][minor] = power;
+    }
+
+    barrier(CLK_LOCAL_MEM_FENCE);
+
+    h0 = tmp.f8[major][minor];
+
+    sum_0.s0 = sum_0.s7 + h0.s0 - h2.s5;
+    sum_0.s1 = sum_0.s0 + h0.s1 - h2.s6;
+    sum_0.s2 = sum_0.s1 + h0.s2 - h2.s7;
+    sum_0.s3 = sum_0.s2 + h0.s3 - h1.s0;
+    sum_0.s4 = sum_0.s3 + h0.s4 - h1.s1;
+    sum_0.s5 = sum_0.s4 + h0.s5 - h1.s2;
+    sum_0.s6 = sum_0.s5 + h0.s6 - h1.s3;
+    sum_0.s7 = sum_0.s6 + h0.s7 - h1.s4;
+
+    float m0 = max(max(sum_0.s0, sum_0.s1), max(sum_0.s2, sum_0.s3));
+    float m1 = max(max(sum_0.s4, sum_0.s5), max(sum_0.s6, sum_0.s7));
+    float m = max(m0, m1);
+
+    if (m >= bestValue) {
+      bestValue = m;
+      bestApproxIndex = me * 1024 * NR_TIMES_PER_BLOCK / 256 + time * 8;
+    }
+
+    h2.s567 = h1.s567;
+    h1 = h0;
+
+    barrier(CLK_LOCAL_MEM_FENCE);
+  }
+
+
+  tmp.best.values[me] = bestValue;
+  tmp.best.approxIndices[me] = bestApproxIndex;
+
+  for (uint i = 256; (i >>= 1) != 0; ) {
+    if (me < i) {
+      if (tmp.best.values[me] < tmp.best.values[me + i]) {
+        tmp.best.values[me] = tmp.best.values[me + i];
+        tmp.best.approxIndices[me] = tmp.best.approxIndices[me + i];
+      }
+    }
+
+    barrier(CLK_LOCAL_MEM_FENCE);
+  }
+
+  if (me == 0) {
+    (*triggerInfo)[tab].bestValue = tmp.best.values[0];
+    (*triggerInfo)[tab].bestApproxIndex = tmp.best.approxIndices[0];
+  }
+}

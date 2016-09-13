@@ -1,0 +1,185 @@
+Jan David's raw notes for 2nd transpose investigation
+--------------------------------------------------------
+
+The beam-formed data is transposed when transported from GPUProc (rtcp) to OutputProc (outputProc).
+
+The rtcp process has:
+  * All TABs and Stokes of 1 subbands per thread,
+
+The outputProc process needs:
+  * All subbands of 1 Stokes of 1 TAB per thread.
+
+
+Generic transpose code:
+  writer:
+    - one thread / receiver node
+    - one write queue / receiver node
+    - data supplier copies data into queue:
+        * data
+        * ID (tab, subband, block)
+    - data from blocks has to be copied when it is split
+      up, or any connection can keep a hold on the set of TABs
+      indefinitely, leading to messy administration.
+
+  reader:
+    - one thread / writer node
+    - one read queue / writer node
+    - receives block (tab, subband, block, data):
+       - must construct several blocks for tabs simultaneously (BlockCollector)
+
+(Hooks into CoInterface/src/TABTranspose.h)
+
+-------------------------
+SENDER (GPUProc)
+-------------------------
+
+* One thread per subband to split each block into its TABs:
+
+* One thread per receiving node to send the TAB blocks:
+
+class TransposeSender {
+public:
+  TransposeSender()
+  {
+  }
+
+  /*
+   * Put the TABs contained in `data' into their respective
+   * writing queues. We memcpy the samples to prevent a hold
+   * on `data'.
+   */
+  void send(BeamFormedData &data) {
+    const size_t nrStokes = data.shape()[0];
+
+    for (size_t fileIdx = 0; fileIdx < data.shape()[0]; ++fileIdx) {
+      size_t writerRank = outputProcRank(stokesIdx);
+
+      SmartPtr<Subband> subband = writerPool[writerRank].free.remove();
+
+      subband->fileIdx = fileIdx;
+      subband->subband = data.blockID.globalSubbandIdx;
+      subband->block   = data.blockID.block;
+
+      memcpy(subband->data.origin(), &data[fileIdx].origin(), subband->data.size() * sizeof *subband->data.origin());
+
+      writerPool[writerRank].filled.append(subband);
+    }
+  }
+
+  // One thread per receiving node
+  void writeOutput(const std::string hostName) {
+    SmartPtr<Subband> subband;
+
+    int myRank = MPI_Rank();
+
+    PortBroker::ClientStream stream(
+      // host
+      hostName,
+
+      // port
+      storageBrokerPort(ps.observationID()),
+
+      // service descriptor,
+      // needs to start with '2nd-transpose-'
+      // and be unique.
+      str(format("2nd-transpose-%d") % myRank));
+
+    while ((subband = writerPool[writerRank].filled.remove()) != NULL) {
+      subband->write(stream);
+
+      writerPool[writerRank].free.append(subband);
+    }
+  }
+
+private:
+};
+
+
+-------------------------
+RECEIVER (OutputProc)
+-------------------------
+
+* In receiving side, one thread per sending node:
+
+class Receivers {
+public:
+  Receivers()
+  :
+    listenThread(this, &Receivers::listenLoop)
+  {
+  }
+
+  ~Receivers()
+  {
+    stop();
+  }
+
+  void stop()
+  {
+    listenThread.cancel();
+  }
+
+  void listenLoop()
+  {
+    for(;;) {
+      struct Client client;
+
+      client.stream      = new PortBroker::ServerStream("2nd-transpose-", true);
+      client.blockReader = new BlockReader(*serverStream, collectors);
+
+      clients.push_back(client);
+    }
+  }
+
+private:
+  struct Client {
+    SmartPtr<ServerStream> stream;
+    SmartPtr<BlockReader> blockReader;
+  };
+
+  std::vector<struct Client> clients;
+  Thread listenThread;
+}
+
+class TransposeReceiver {
+public:
+  TransposeReceiver(std::map<size_t,BlockCollector> &collectors)
+  :
+    collector(collector)
+  {
+  }
+
+  void receiveSubbands(Stream &stream)
+  {
+    Subband subband;
+
+    for(;;) {
+      subband.read(stream);
+
+      collectors.at(subband.fileIdx).addSubband(subband);
+    }
+  }
+
+private:
+  std::map<size_t,BlockCollector> &collectors;
+};
+
+* And, of course, one output thread per TAB to write to disk:
+
+class BlockWriter {
+public:
+  void write() {
+    SmartPtr<Block> block;
+
+    Stream stream(connectToDisk(writerRank));
+
+    while ((block = outputPool.filled.remove()) != NULL) {
+      block->write(stream);
+
+      outputPool.free.append(block);
+    }
+  }
+private:
+  Pool< SmartPtr<Block> > &outputPool;
+};
+

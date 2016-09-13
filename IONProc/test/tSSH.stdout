@@ -1,0 +1,12 @@
+system success
+stdout read [stdout]
+stderr read [stderr]
+Captured [capture stdout [stdout]
+]
+but not capture stderr [stderr]
+Captured [capture stdout [stdout]
+]
+stderr first [stderr]
+stdout second [stdout]
+stdout first [stdout]
+stderr second [stderr]

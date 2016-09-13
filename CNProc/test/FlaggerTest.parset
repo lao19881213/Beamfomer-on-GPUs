@@ -1,0 +1,163 @@
+#OLAP.CNProc.integrationSteps		 = 48
+OLAP.CNProc.integrationSteps		 = 12288
+OLAP.CNProc.phaseOnePsets		 = [0..4]
+OLAP.CNProc.phaseTwoPsets		 = [0..4]
+OLAP.CNProc.phaseThreePsets		 = [0..4]
+OLAP.CNProc.phaseOneTwoCores		 = [0..7]
+OLAP.CNProc.phaseThreeCores		 = [0..7]
+OLAP.CNProc.partition			 = PartitionName
+OLAP.CNProc.tabList			 = []
+
+OLAP.CNProc.onlineFlagging               = T # enable or disable all online flagging
+
+OLAP.CNProc.onlinePreCorrelationNoChannelsFlagging = T
+
+OLAP.CNProc.onlinePreCorrelationFlagging = F
+OLAP.CNProc.onlinePreCorrelationFlaggingType = INTEGRATED_SUM_THRESHOLD_2D_WITH_HISTORY # THRESHOLD, INTEGRATED_THRESHOLD, INTEGRATED_THRESHOLD_2D, SUM_THRESHOLD, INTEGRATED_SUM_THRESHOLD, INTEGRATED_SUM_THRESHOLD_WITH_HISTORY, INTEGRATED_SMOOTHED_SUM_THRESHOLD, INTEGRATED_SMOOTHED_SUM_THRESHOLD_WITH_HISTORY, INTEGRATED_SUM_THRESHOLD_2D, INTEGRATED_SUM_THRESHOLD_2D_WITH_HISTORY
+OLAP.CNProc.onlinePreCorrelationFlaggingStatisticsType = WINSORIZED  # NORMAL, WINSORIZED
+
+OLAP.CNProc.onlinePostCorrelationFlagging= F
+OLAP.CNProc.onlinePostCorrelationFlaggingType = SMOOTHED_SUM_THRESHOLD_WITH_HISTORY  # THRESHOLD, SUM_THRESHOLD, SMOOTHED_SUM_THRESHOLD, SMOOTHED_SUM_THRESHOLD_WITH_HISTORY
+OLAP.CNProc.onlinePostCorrelationFlaggingStatisticsType = WINSORIZED  # NORMAL, WINSORIZED
+OLAP.CNProc.onlinePostCorrelationFlaggingDetectBrokenStations = F
+OLAP.CNProc.onlinePostCorrelationFlaggingIntegration = 768
+
+OLAP.realTime				 = F
+OLAP.maxNetworkDelay			 = .1
+OLAP.correctClocks			 = T
+OLAP.correctBandPass			 = T
+Observation.nrBitsPerSample		 = 16
+OLAP.nrTimesInFrame			 = 16
+OLAP.nrSecondsOfBuffer			 = 3.5
+OLAP.CNProc.nrPPFTaps			 = 16
+
+OLAP.Storage.userName			 = rob
+OLAP.Storage.sshIdentityFile		 = /home/rob/.ssh/id_dsa
+OLAP.Storage.msWriter			 = /home/rob/root/bin/Storage_main
+OLAP.Storage.subbandsPerPart		 = 1
+OLAP.Storage.partsPerStokes		 = 1
+OLAP.Storage.hosts			 = [localhost]
+OLAP.storageNodeList			 = [32*0]
+
+OLAP.OLAP_Conn.IONProc_Storage_Ports	 = [8300..9000]
+OLAP.OLAP_Conn.IONProc_Storage_Transport = TCP
+OLAP.OLAP_Conn.rawDataOutputOnly	 = F
+OLAP.storageStationNames		 = [CS005HBA0,CS006HBA0,RS205HBA,RS406HBA,UK608HBA]
+Observation.VirtualInstrument.stationList = [CS005HBA0,CS006HBA0,RS205HBA,RS406HBA,UK608HBA]
+OLAP.tiedArrayStationNames		 = []
+Observation.Beam[0].nrTiedArrayBeams 	 = 1
+Observation.Beam[0].TiedArrayBeam[0].angle1 = 0.0
+Observation.Beam[0].TiedArrayBeam[0].angle2 = 0.0
+Observation.Beam[0].TiedArrayBeam[0].coherent = false
+Observation.Beam[0].TiedArrayBeam[0].dispersionMeasure = 0
+
+OLAP.IONProc.integrationSteps		 = 1
+OLAP.CNProc_CoherentStokes.timeIntegrationFactor = 1
+OLAP.CNProc_IncoherentStokes.timeIntegrationFactor = 1
+OLAP.CNProc_CoherentStokes.channelsPerSubband = 1
+OLAP.CNProc_IncoherentStokes.channelsPerSubband = 1
+#OLAP.CNProc_CoherentStokes.which	 = IQUV
+#OLAP.CNProc_IncoherentStokes.which	 = IQUV
+OLAP.CNProc_CoherentStokes.which	 = I
+OLAP.CNProc_IncoherentStokes.which	 = I
+OLAP.PencilInfo.storageNodeList		 = []
+OLAP.CNProc_CoherentStokes.subbandsPerFile = 244
+OLAP.CNProc_IncoherentStokes.subbandsPerFile = 244
+
+OLAP.delayCompensation			 = F
+OLAP.DelayComp.positionType		 = ITRF
+OLAP.DelayComp.nrCalcDelays		 = 16
+OLAP.dispersionMeasure			 = 12.46
+Observation.ObserverName		 = Rob
+Observation.Campaign.name		 = Online Flagger Test
+Observation.Campaign.title		 = dr.
+Observation.Campaign.contact		 = Rob
+Observation.Campaign.PI			 = Rob
+Observation.Campaign.CO_I		 = Rob
+Observation.ProjectName			 = Online Flagger Test
+Observation.nrPolarisations		 = 2
+Observation.antennaSet			 = HBA
+Observation.bandFilter			 = HBA_110_190
+Observation.subbandList			 = [200..231]
+Observation.beamList			 = [32*0]
+Observation.rspBoardList		 = [32*0]
+Observation.rspSlotList		 	 = [0..31]
+Observation.channelsPerSubband		 = 1
+Observation.sampleClock			 = 200
+Observation.nrSlotsInFrame		 = 32
+Observation.ObsID			 = 1000000
+Observation.startTime			 = '2011-11-01 15:06:56'
+Observation.stopTime			 = '2011-11-01 15:07:56'
+#Observation.stopTime			 = '2011-11-01 15:16:56'
+#Observation.stopTime			 = '2011-11-01 15:45:00'
+Observation.nrBeams			 = 1
+Observation.AnaBeam[0].directionType	 = J2000
+Observation.AnaBeam[0].angle1		 = 5.069077189772498
+Observation.AnaBeam[0].angle2		 = 0.38194712046815327
+Observation.AnaBeam[0].target		 = B1919+21
+Observation.Beam[0].directionType	 = J2000
+Observation.Beam[0].angle1		 = 5.069077189772498
+Observation.Beam[0].angle2		 = 0.38194712046815327
+Observation.Beam[0].target		 = B1919+21
+#Observation.MSNameMask			 = /tmp/rob${RAID}/L${YEAR}_${MSNUMBER}/SB${SUBBAND}.MS
+
+# TODO outputting filteredData does not work yet
+#Observation.DataProducts.Output_FilteredData.enabled	 = T
+#Observation.DataProducts.Output_FilteredData.locations	 = [localhost:/tmp/rob]
+#Observation.DataProducts.Output_FilteredData.filenames	 = [FilteredData]
+
+#Observation.DataProducts.Output_Correlated.enabled	 = T
+#Observation.DataProducts.Output_Correlated.locations	 = [32*localhost:/tmp/rob]
+#Observation.DataProducts.Output_Correlated.filenames	 = [SB000.MS,SB001.MS,SB002.MS,SB003.MS,SB004.MS,SB005.MS,SB006.MS,SB007.MS,SB008.MS,SB009.MS,SB010.MS,SB011.MS,SB012.MS,SB013.MS,SB014.MS,SB015.MS,SB016.MS,SB017.MS,SB018.MS,SB019.MS,SB020.MS,SB021.MS,SB022.MS,SB023.MS,SB024.MS,SB025.MS,SB026.MS,SB027.MS,SB028.MS,SB029.MS,SB030.MS,SB031.MS]
+
+#Observation.DataProducts.Output_IncoherentStokes.enabled	 = T
+#Observation.DataProducts.Output_IncoherentStokes.locations	 = [32*localhost:/tmp/rob]
+#Observation.DataProducts.Output_IncoherentStokes.filenames	 = [SB000.incStokes,SB001.incStokes,SB002.incStokes,SB003.incStokes,SB004.incStokes,SB005.incStokes,SB006.incStokes,SB007.incStokes,SB008.incStokes,SB009.incStokes,SB010.incStokes,SB011.incStokes,SB012.incStokes,SB013.incStokes,SB014.incStokes,SB015.incStokes,SB016.incStokes,SB017.incStokes,SB018.incStokes,SB019.incStokes,SB020.incStokes,SB021.incStokes,SB022.incStokes,SB023.incStokes,SB024.incStokes,SB025.incStokes,SB026.incStokes,SB027.incStokes,SB028.incStokes,SB029.incStokes,SB030.incStokes,SB031.incStokes]
+
+Observation.DataProducts.Output_Beamformed.enabled	 = T
+Observation.DataProducts.Output_Beamformed.locations	 = [localhost:/var/scratch/rob]
+Observation.DataProducts.Output_Beamformed.filenames	 = [BeamFormedData]
+
+#Observation.DataProducts.Output_Beamformed.locations	 = [2*localhost:/tmp/rob]
+#Observation.DataProducts.Output_Beamformed.filenames	 = [CV000.X,CV000.Y]
+#Observation.DataProducts.Output_CoherentStokes.enabled	 = F
+#Observation.DataProducts.Output_CoherentStokes.locations = [1*localhost:/tmp/rob]
+#Observation.DataProducts.Output_CoherentStokes.filenames = [Coherent.0.I]
+#Observation.DataProducts.Output_CoherentStokes.locations = [8*localhost:/tmp/rob]
+#Observation.DataProducts.Output_CoherentStokes.filenames = [Coherent.0.I,Coherent.0.Q,Coherent.0.U,Coherent.0.V,Coherent.1.I,Coherent.1.Q,Coherent.1.U,Coherent.1.V]
+#Observation.DataProducts.Output_Trigger.enabled		 = F
+#Observation.DataProducts.Output_Trigger.locations	 = []
+#Observation.DataProducts.Output_Trigger.filenames	 = []
+PIC.Core.IONProc.PartitionName[0].inputs = [CS005HBA0/RSP0]
+PIC.Core.IONProc.PartitionName[1].inputs = [CS006HBA0/RSP0]
+PIC.Core.IONProc.PartitionName[2].inputs = [RS205HBA/RSP0]
+PIC.Core.IONProc.PartitionName[3].inputs = [RS406HBA/RSP0]
+PIC.Core.IONProc.PartitionName[4].inputs = [UK608HBA/RSP0]
+
+PIC.Core.Station.CS005HBA0.RSP.ports   = [file:/var/scratch/rob/FlaggerTest-01-11-11/CS005.raw]
+PIC.Core.Station.CS006HBA0.RSP.ports   = [file:/var/scratch/rob/FlaggerTest-01-11-11/CS006.raw]
+PIC.Core.Station.RS205HBA.RSP.ports    = [file:/var/scratch/rob/FlaggerTest-01-11-11/RS205.raw]
+PIC.Core.Station.RS406HBA.RSP.ports    = [file:/var/scratch/rob/FlaggerTest-01-11-11/RS406.raw]
+PIC.Core.Station.UK608HBA.RSP.ports    = [file:/var/scratch/rob/FlaggerTest-01-11-11/UK608.raw]
+
+Observation.referencePhaseCenter       = [3826577.110,461022.900,5064892.758]
+
+PIC.Core.CS005HBA0.clockCorrectionTime = 8.513765e-06
+PIC.Core.CS005HBA0.phaseCenter = [3826701.204,460989.202,5064802.657]
+PIC.Core.CS005HBA0.position = [3826701.204,460989.202,5064802.657]
+
+PIC.Core.CS006HBA0.clockCorrectionTime = 7.855584e-06
+PIC.Core.CS006HBA0.phaseCenter = [3826653.826,461136.392,5064824.914]
+PIC.Core.CS006HBA0.position = [3826653.826,461136.392,5064824.914]
+
+PIC.Core.RS205HBA.clockCorrectionTime = 0
+PIC.Core.RS205HBA.phaseCenter = [3831479.714,463487.482,5060989.875]
+PIC.Core.RS205HBA.position = [3831479.714,463487.482,5060989.875]
+
+PIC.Core.RS406HBA.clockCorrectionTime = 0
+PIC.Core.RS406HBA.phaseCenter = [3818425.334,452019.946,5071817.384]
+PIC.Core.RS406HBA.position = [3818425.334,452019.946,5071817.384]
+
+PIC.Core.UK608HBA.clockCorrectionTime = 0
+PIC.Core.UK608HBA.phaseCenter = [4008461.975,-100376.657,4943716.841]
+PIC.Core.UK608HBA.position = [4008461.975,-100376.657,4943716.841]

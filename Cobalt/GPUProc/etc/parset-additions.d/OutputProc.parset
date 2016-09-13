@@ -1,0 +1,12 @@
+# The user with which to log into the storage cluster. If empty, is set to $USER.
+Cobalt.OutputProc.userName = 
+
+# The public & private keys used for logging in.
+# If empty, ~/.ssh/id_rsa (.pub) and ~/.ssh/id_dsa (.pub) are tried.
+Cobalt.OutputProc.sshPublicKey =
+Cobalt.OutputProc.sshPrivateKey =
+
+# The executable of the process to start.
+# which thus needs to be found in $PATH after login.
+Cobalt.OutputProc.executable = outputProc
+

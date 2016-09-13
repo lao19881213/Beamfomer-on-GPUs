@@ -1,0 +1,83 @@
+#!/bin/bash
+
+# Arguments for startBGL.sh:
+#
+# 1. unused
+# 2. unused
+# 3. unused
+# 4. parset
+# 5. obs id
+#
+# Arguments for stopBGL.sh:
+#
+# 1. unused
+# 2. obs id
+
+. $srcdir/testFuncs.sh
+
+# Create a LOFARROOT environment
+mklofarroot tstartBGL_tmp.lofarroot
+
+echo "***************************"
+echo "Test 0: check environment"
+echo "***************************"
+which startBGL.sh       || error "Cannot execute startBGL.sh"
+which stopBGL.sh        || error "Cannot execute stopBGL.sh"
+which mpirun.sh         || error "Cannot execute mpirun.sh"
+which runObservation.sh || error "Cannot execute runObservation.sh"
+which rtcp              || error "Cannot execute rtcp"
+
+echo "***************************"
+echo "Test 1: no parameters"
+echo "        (expects failure)"
+echo "***************************"
+startBGL.sh && error "startBGL.sh did not fail as expected"
+stopBGL.sh && error "stopBGL.sh did not fail as expected"
+
+# Log files must be present
+[ -r $LOFARROOT/var/log/startBGL.log ] || error "Cannot read $LOFARROOT/var/log/startBGL.log"
+[ -r $LOFARROOT/var/log/stopBGL.log ]  || error "Cannot read $LOFARROOT/var/log/stopBGL.log"
+
+echo "***************************"
+echo "Test 2: non-existing parset"
+echo "        (expects failure)"
+echo "***************************"
+startBGL.sh 1 2 3 /non-existing 1000 && error "startBGL.sh did not fail as expected"
+
+echo "***************************"
+echo "Test 3: kill non-existing obs"
+echo "        (expects failure)"
+echo "***************************"
+stopBGL.sh 1 0 && error "stopBGL.sh did not fail as expected"
+
+echo "***************************"
+echo "Test 4: kill finished obs"
+echo "        (expects failure)"
+echo "***************************"
+echo 99999999 > $LOFARROOT/var/run/rtcp-0.pid || error "Could not create $LOFARROOT/var/run/rtcp-0.pid"
+stopBGL.sh 1 0 && error "stopBGL.sh did not fail as expected"
+
+echo "***************************"
+echo "Test 5: normal run"
+echo "        (expects success)"
+echo "***************************"
+startBGL.sh 1 2 3 $testdir/tstartBGL.in_parset 1000 || error "startBGL.sh failed"
+
+# PID file must be present
+[ -r $LOFARROOT/var/run/rtcp-1000.pid ] || error "Cannot read $LOFARROOT/var/run/rtcp-1000.pid"
+
+# Log file must be present
+[ -r $LOFARROOT/var/log/rtcp-1000.log ] || error "Cannot read $LOFARROOT/var/log/rtcp-1000.log"
+
+# We expect rtcp to still run, because it takes several
+# seconds to initialise. If rtcp is already done, stopBGL.sh
+# will give an error!
+#
+# If this is problematic, a possible fix is to put the
+# observation start time in tstartBGL.in_parset to far into
+# the future, and enable real-time mode. That way, rtcp
+# will surely be running. However, in that case:
+#   - if rtcp crashes, stopBGL.sh will error
+#   - if stopBGL.sh malfunctions, rtcp will linger
+stopBGL.sh 1 1000 || error "stopBGL.sh failed"
+

@@ -1,0 +1,251 @@
+# true: correlator is online
+#   - receive live input
+#   - drop late input
+#   - drop output if buffer is full
+# false: correlator is offline
+#   - receive recorded input
+#   - wait for input to arrive
+#   - never drop output (wait for data to be written)
+Cobalt.realTime=false 
+# SAS id
+Observation.ObsID=0
+
+# start and stop times (UTC)
+Observation.startTime=2013-01-01 00:00:00
+Observation.stopTime=2013-01-01 00:01:00
+
+# ===============================
+# Station information
+# ===============================
+
+# List of input stations
+Observation.VirtualInstrument.stationList=[CS001, CS002, CS003, CS004, CS005, CS006, CS007, CS011, CS013, CS017, CS021, CS024, CS026, CS028, CS030, CS031, CS032, CS101, CS103, CS201, CS301, CS302, CS401, CS501]
+
+# Station clock in Mhz [200, 160]
+Observation.sampleClock=200
+# Number of bit/sample emitted by the stations [(4), 8, 16]
+Observation.nrBitsPerSample=16
+
+# Antenna set [HBA_DUAL, HBA_ZERO, HBA_ONE, HBA_JOINED, HBA_DUAL_INNER, HBA_ONE_INNER, HBA_ZERO_INNER, HBA_JOINED_INNER, LBA_INNER, LBA_OUTER, LBA_SPARSE_EVEN, LBA_SPARSE_ODD]
+Observation.antennaSet=HBA_DUAL_INNER
+# sensitivity spectrum of station [LBA_10_70, LBA_30_70, LBA_10_90, LBA_30_90, HBA_110_190, HBA_170_230, HBA_210_250]
+Observation.bandFilter=HBA_110_190
+
+# Retrieved from station_configuration.parset
+#PIC.Core.CS001.clockCorrectionTime=0.0
+#PIC.Core.CS001.phaseCenter=[0.0, 0.0, 0.0]
+#PIC.Core.CS001.LBA_INNER.LBA_30_90.phaseCorrection.X=0.0
+#PIC.Core.CS001.LBA_INNER.LBA_30_90.phaseCorrection.Y=0.0
+#PIC.Core.CS001.LBA_INNER.LBA_30_90.delayCorrection.X=0.0
+#PIC.Core.CS001.LBA_INNER.LBA_30_90.delayCorrection.Y=0.0
+
+# Retrieved from station_configuration.parset
+#PIC.Core.CS001LBA.ports=[udp:0.0.0.0:4346, udp:0.0.0.0:4347, udp:0.0.0.0:4348, udp:0.0.0.0:4349]
+
+# Optional: mapping of subbands on RSP boards, per station
+# Example: subbands 0 and 1 are emitted on board 0, slots 0 and 1.
+# There are 4 boards, and 61/122/244 slots per board (depending on bit mode).
+#Observation.Dataslots.CS001LBA.RSPBoardList=[0,0]
+#Observation.Dataslots.CS001LBA.DataslotList=[0,1]
+
+# Default for Observation.Dataslots.STATION.RSPBoardList
+Observation.rspBoardList=[0]
+# Default for Observation.Dataslots.STATION.DataslotList
+Observation.rspSlotList=[0]
+
+
+# ===============================
+# Corrections
+# ===============================
+
+# Correct station bandpass (due to station FFT)
+Cobalt.correctBandPass=true
+# Correct station clock offsets (due to delay in shared clock)
+Cobalt.correctClocks=true
+# Correct geometric delays (time/distance between stations)
+Cobalt.delayCompensation=true
+
+# geometric center of LOFAR
+#Observation.referencePhaseCenter=[0.0, 0.0, 0.0] # Read from station_configuration.parset ze
+
+# ===============================
+# Cobalt hardware configuration
+# ===============================
+
+# Retrieved from station_map.parset
+#Cobalt.Hardware.nrNodes = 1
+#Cobalt.Hardware.Node[0].host=cbt001
+#Cobalt.Hardware.Node[0].cpu=0
+#Cobalt.Hardware.Node[0].gpus=[0,1]
+#Cobalt.Hardware.Node[0].stations=[CS001LBA, CS001HBA0]
+
+# ===============================
+# Pointing information
+# ===============================
+
+# Pointing information
+# number of station beams (SAPs)
+Observation.nrBeams=1
+# Pointing of the SAP
+# [J2000, AZEL, SUN, MOON, planets, etc]
+Observation.Beam[0].directionType=J2000
+Observation.Beam[0].angle1=0.0
+Observation.Beam[0].angle2=0.0
+Observation.Beam[0].target=""
+
+# Subbands that are tied to this SAP
+Observation.Beam[0].subbandList=[0]
+# Optional: Use manual subband frequencies instead of calculated based on subband number + subband_width
+#Observation.Beam[0].frequencyList=[]
+
+# analog tile beam (only one, only HBA)
+Observation.nrAnaBeams=1
+Observation.AnaBeam[0].directionType=J2000
+Observation.AnaBeam[0].angle1=0.0
+Observation.AnaBeam[0].angle2=0.0
+
+# number of samples in a block. multiple of:
+# - Cobalt.Correlator.nrChannelsPerSubband
+# - OLAP.CNProc.CoherentStokes.channelsPerSubband * OLAP.CNProc.CoherentStokes.timeIntegrationFactor
+# - OLAP.CNProc.IncoherentStokes.channelsPerSubband * OLAP.CNProc.IncoherentStokes.timeIntegrationFactor
+# - Cobalt.Beamformer.dedispersionFFTsize (due to BeamFormer FFT)
+# - 3 (due to Correlator.cu)
+#
+# In practice, a multiple of 2048*3 will almost always suffice.
+#
+# Note: to convert from #samples to #seconds:
+#   seconds(samples) = samples * 1024 / (Observation.sampleClock * 1e6)
+Cobalt.blockSize=196608   # 1 second
+
+# =======
+# Storage
+# =======
+
+# List of storage host names. Leave empty to store locally
+OLAP.Storage.hosts=[]
+ 
+# ===============================
+# Correlator pipeline information
+# ===============================
+Observation.DataProducts.Output_Correlated.enabled=false
+
+Cobalt.Correlator.nrChannelsPerSubband=1
+Cobalt.Correlator.nrBlocksPerIntegration=1  # only 1 is currently supported
+
+# A filename and location for each subband
+Observation.DataProducts.Output_Correlated.filenames=[SB000.MS]    # filename 
+Observation.DataProducts.Output_Correlated.locations=[localhost:.] # host:directory
+ 
+# ===============================
+# Beamformer pipeline information
+# ===============================
+       
+Observation.DataProducts.Output_Beamformed.enabled=true
+
+# Apply DM (dispersion measure, delay due to interstellar medium)
+Cobalt.Beamformer.coherentDedisperseChannels=false
+
+# Which stokes to create [I, IQUV, XXYY]
+# XXYY is not supported for incoherent beams
+OLAP.CNProc_CoherentStokes.which=I
+OLAP.CNProc_IncoherentStokes.which=I
+
+# Number of channels to create in the output
+OLAP.CNProc_CoherentStokes.channelsPerSubband=1
+OLAP.CNProc_IncoherentStokes.channelsPerSubband=1
+
+# Temporal data reduction
+OLAP.CNProc_CoherentStokes.timeIntegrationFactor=4
+OLAP.CNProc_IncoherentStokes.timeIntegrationFactor=4
+
+# Maximum number of subbands to store in each file
+OLAP.CNProc_CoherentStokes.subbandsPerFile=488
+OLAP.CNProc_IncoherentStokes.subbandsPerFile=488
+
+Observation.Beam[0].nrTiedArrayBeams=200
+
+# Input macro that creates several TABs.
+# The TABs from the rings are produced before the
+# manually specified ones below.
+
+# Number of rings to create
+Observation.Beam[0].nrTabRings=0
+# Distance between rings
+Observation.Beam[0].ringWidth=0
+
+# TAB pointing, relative to the SAP (station beam).
+# The directionType must therefor match the directionType
+# of the SAP.
+Observation.Beam[0].TiedArrayBeam[0].directionType=J2000
+Observation.Beam[0].TiedArrayBeam[0].angle1=0.0
+Observation.Beam[0].TiedArrayBeam[0].angle2=0.0
+
+# If >0, dedisperse the data for the given DM
+Observation.Beam[0].TiedArrayBeam[0].dispersionMeasure=0.0
+
+# Whether the beam is coherent. For complex voltages, select true.
+Observation.Beam[0].TiedArrayBeam[0].coherent=true
+
+# A filename and location for each file.
+# Files are created as follows:
+#   Per SAP, each TAB is put in a different file
+#   Per TAB, each Stokes is put into a different file
+#   Per Stokes, the data is divided using the .subbandsPerFile setting
+Observation.DataProducts.Output_Beamformed.filenames=[/]  # filename 
+Observation.DataProducts.Output_Beamformed.locations=[:.] # host:directory
+
+# Number of channels used for the coherent dedispersion kernel
+Cobalt.Beamformer.dedispersionFFTsize=2048
+
+
+
+# Read from /dev/null which blocks, so all "data" is flagged. This is fine for the intended test.
+PIC.Core.Station.CS001HBA0.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS001HBA1.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS002HBA0.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS002HBA1.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS003HBA0.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS003HBA1.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS004HBA0.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS004HBA1.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS005HBA0.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS005HBA1.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS006HBA0.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS006HBA1.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS007HBA0.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS007HBA1.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS011HBA0.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS011HBA1.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS013HBA0.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS013HBA1.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS017HBA0.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS017HBA1.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS021HBA0.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS021HBA1.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS024HBA0.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS024HBA1.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS026HBA0.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS026HBA1.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS028HBA0.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS028HBA1.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS030HBA0.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS030HBA1.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS031HBA0.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS031HBA1.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS032HBA0.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS032HBA1.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS101HBA0.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS101HBA1.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS103HBA0.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS103HBA1.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS201HBA0.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS201HBA1.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS301HBA0.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS301HBA1.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS302HBA0.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS302HBA1.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS401HBA0.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS401HBA1.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS501HBA0.RSP.ports=[file:/dev/null]
+PIC.Core.Station.CS501HBA1.RSP.ports=[file:/dev/null]
+

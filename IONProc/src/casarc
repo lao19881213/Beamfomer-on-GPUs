@@ -1,0 +1,4 @@
+measures.directory: /opt/casacore/data 
+
+# use nutation tables for increased (and needed) accuracy
+measures.nutation.b_usejpl: true

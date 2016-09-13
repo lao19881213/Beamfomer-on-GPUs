@@ -1,0 +1,118 @@
+------------------------
+Beamformer Pipeline
+------------------------
+
+Design decisions:
+-------------------
+
+* The PPF is at the end of the pipeline, because CS and IS can request a different number of channels.
+* The Delay Compensation has to run on a specific time/frequency resolution depending on the baseline and
+  declination of the source.
+* Coherent Dedispersion is under construction, as is the IS pipeline.
+
+To investigate:
+
+* Coherent Dedispersion
+* FFT scaling (FFT + FFT-1 means scaling the amplitude), does it require compensation?
+  If so, we can do so in the Delay Compensation kernel.
+
+Pipeline
+-------------------
+
+For max size, we assume:
+ - 48 stations
+ - 1 subband
+ - 1 second blocks (195312.5 samples) rounded to next multiple of 4096
+
+Note:
+  MB = 1e6 bytes
+  (*) = requires change from current implementation
+  (**) = is a new kernel (wrt what we already ported)
+
+Flow:           Data dimensions:                        Max size (fcomplex):                        Buffer:
+===================================================================================================================
+(input)         [station][samples][pol]                 [48][196608][2]     =  72 MiB               A
+   |                                                    (i16complex)
+   V
+IntToFloat + Transpose
+   |            [station][pol][samples]                 [48][2][196608]     = 144 MiB               B
+   V
+FFT-64 {inplace}
+   |            [station][pol][samples][channel]        [48][2][3072][64]   = 144 MiB               B
+   V
+Delay compensation (*: no transpose) {I/O: delays}
+   |            [station][pol][channel][samples]        [48][2][64][3072]   = 144 MiB               A
+   V
+FFT-64 {inplace}
+   |            [station][pol][chan1][samples][chan2]   [48][2][64][48][64] = 144 MiB               A
+   V
+BandPass + Transpose {I/O: weights}
+   |            [station][chan1][chan2][samples][pol]   [48][64][64][48][2] = 144 MiB               B
+   V          = [stations][channel][samples][pol]
+   X
+
+Complex Voltages/Coherent Stokes:
+-----------------------------------
+   X            [station][channel][samples][pol]        [48][4096][48][2]   = 144 MiB               B
+   |
+   V
+BeamFormer {I/O: weights}
+   |            [channel][samples][tab][pol]            [4096][48][tab][2]  = 3 MiB/TAB             A
+   V
+Transpose  
+   |            [tab][pol][samples][channel]            [tab][2][48][4096]  = 3 MiB/TAB             1ch: CS: C, CV: D
+   |                                                                                                Nch: CS: D, CV: C
+   V
+iFFT-4k {inplace}
+   |            [tab][pol][samples]                     [tab][2][196608]    = 3 MiB/TAB             1ch: CS: C, CV: D
+   |                                                                                                Nch: CS: D, CV: C
+   V
+FIR-16 (if >1ch)
+   |            [tab][pol][samples]                     [tab][2][196608]    = 3 MiB/TAB             1ch: CS: -, CV: -
+   |                                                                                                Nch: CS: C, CV: D
+   V
+FFT-16 {inplace} (if >1ch)
+   |            [tab][pol][samples][channel]            [tab][2][12288][16] = 3 MiB/TAB             1ch: CS: -, CV: -
+   |                                                                                                Nch: CS: C, CV: D
+   V
+Coherent Stokes (*: no transpose)
+   |            [tab][stokes][samples][channel]         [tab][4][12288][16] = 0.75 MiB/TAB/Stokes   1ch: CS: D, CV: -
+   |                                                    (float)                                     Nch: CS: D, CV: -
+   V
+(output)
+
+Incoherent Stokes:
+-----------------------------------
+   X            [station][channel][samples][pol]        [48][4096][48][2]   = 144 MiB               B
+   |
+   V
+Transpose + Copy
+   |            [station][pol][samples][channel]        [48][2][48][4096]   = 144 MiB               A
+   V
+iFFT-4k {inplace}
+   |            [station][pol][samples]                 [48][2][196608]     = 144 MiB               A
+   V
+FIR-16 (if >1ch) 
+   |            [station][pol][samples]                 [48][2][196608]     = 144 MiB               B
+   |
+   V
+FFT-16 {inplace} (if >1ch)
+   |            [station][pol][samples][channel]        [48][2][12288][16]  = 144 MiB               B
+   |
+   V
+Incoherent Stokes (*: no transpose)
+   |            [stokes][samples][channel]              [4][12288][16]      = 3 MiB                 E
+   V                                                    (float)
+(output)
+
+
+A = max(144 MiB, 3 MiB * #coherent TABs/pass)
+B = 144 MiB
+C = max(144 MiB, 3 MiB * #coherent TABs/pass)
+D = 0.75 MiB/TAB/Stokes (size of output)
+E = 3 MiB
+
+Because each pass is ~6 beams, and certainly less than 144/3=48, we need 432 MiB of intermediate buffers (A + B + C).
+If the WQ has 1791 MiB (8GiB per GPU = 2 GiB per GPU core, minus overhead), we can form 
+(1791 MiB - 432 MiB) / 0.75 MiB/TAB/Stokes = 1812 TAB * Stokes.
+

@@ -1,0 +1,14 @@
+# Configure the rootLogger
+log4cplus.rootLogger=INFO, STDOUT
+log4cplus.LCS.Common=INFO, STDOUT
+log4cplus.logger.TRC=TRACE, NOLOG
+log4cplus.logger.TRC.additivity=false
+log4cplus.additivity=false
+# Define the STDOUT appender
+log4cplus.appender.STDOUT=log4cplus::ConsoleAppender
+log4cplus.appender.STDOUT.Threshhold=TRACE2
+log4cplus.appender.STDOUT.layout=log4cplus::PatternLayout
+log4cplus.appender.STDOUT.layout.ConversionPattern=%-5p [%x]%c{3} - %m%n
+log4cplus.appender.STDOUT.logToStdErr=false
+log4cplus.appender.STDOUT.ImmediateFlush=true
+log4cplus.appender.NOLOG=log4cplus::NullAppender

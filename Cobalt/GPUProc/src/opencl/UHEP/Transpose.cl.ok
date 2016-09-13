@@ -1,0 +1,36 @@
+typedef __global float2 (*TransposedDataType)[NR_TABS][NR_POLARIZATIONS][NR_TIMES_PER_BLOCK + NR_STATION_FILTER_TAPS - 1][512];
+typedef __global float2 (*ComplexVoltagesType)[NR_SUBBANDS][NR_TIMES_PER_BLOCK + NR_STATION_FILTER_TAPS - 1][NR_TABS][NR_POLARIZATIONS];
+
+
+__kernel void UHEP_Transpose(__global void *restrict transposedDataPtr,
+                             __global const void *restrict complexVoltagesPtr,
+                             __global int reverseSubbandMapping[512])
+{
+  TransposedDataType transposedData = (TransposedDataType) transposedDataPtr;
+  ComplexVoltagesType complexVoltages = (ComplexVoltagesType) complexVoltagesPtr;
+
+  __local float2 tmp[16][17][2];
+
+  uint base_tab = 16 * get_group_id(1);
+  uint base_sb = 16 * get_group_id(2);
+  uint pol = get_global_id(0);
+  uint id_1 = get_local_id(1);
+  uint id_2 = get_local_id(2);
+  int source_sb_1 = reverseSubbandMapping[base_sb + id_1];
+  int source_sb_2 = reverseSubbandMapping[base_sb + id_2];
+
+  for (int time = 0; time < NR_TIMES_PER_BLOCK + NR_STATION_FILTER_TAPS - 1; time++) {
+    if (NR_TABS % 16 == 0 || base_tab + id_1 < NR_TABS)
+      if (source_sb_2 >= 0)
+        tmp[id_2][id_1][pol] = (*complexVoltages)[source_sb_2][time][base_tab + id_1][pol];
+
+    barrier(CLK_LOCAL_MEM_FENCE);
+
+    if (NR_TABS % 16 == 0 || base_tab + id_2 < NR_TABS) {
+      float2 sample = source_sb_1 >= 0 ? tmp[id_1][id_2][pol] : 0;
+      (*transposedData)[base_tab + id_2][pol][time][base_sb + id_1] = sample;
+    }
+
+    barrier(CLK_LOCAL_MEM_FENCE);
+  }
+}

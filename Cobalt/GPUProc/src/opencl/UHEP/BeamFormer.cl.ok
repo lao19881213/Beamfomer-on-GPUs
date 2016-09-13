@@ -1,0 +1,509 @@
+#if NR_BITS_PER_SAMPLE == 8
+typedef char2 SampleType;
+#else
+typedef short2 SampleType;
+#endif
+
+#if NR_STATIONS > 48
+#error unsupported number of stations (max = 48)
+#endif
+
+
+typedef __global float2 (*ComplexVoltagesType)[NR_SUBBANDS][NR_TIMES_PER_BLOCK + NR_STATION_FILTER_TAPS - 1][NR_TABS][NR_POLARIZATIONS];
+typedef __global SampleType (*SamplesType)[NR_STATIONS][NR_SUBBANDS][NR_TIMES_PER_BLOCK + NR_STATION_FILTER_TAPS - 1][NR_POLARIZATIONS];
+typedef __global float2 (*WeightsType)[NR_STATIONS][NR_SUBBANDS][NR_TABS];
+
+
+__kernel void complexVoltages(__global void *complexVoltagesPtr,
+                              __global const void *samplesPtr,
+                              __global const void *weightsPtr)
+{
+  ComplexVoltagesType complexVoltages = (ComplexVoltagesType) complexVoltagesPtr;
+  SamplesType samples = (SamplesType) samplesPtr;
+  WeightsType weights = (WeightsType) weightsPtr;
+
+  uint pol = get_local_id(0);
+  uint tab = get_local_id(1);
+  uint subband = get_global_id(2);
+
+  float2 sample;
+  __local float2 local_samples[NR_STATIONS >= 24 ? 24 : NR_STATIONS][16][NR_POLARIZATIONS];
+
+#if NR_STATIONS >= 1
+  float2 weight_00 = (*weights)[ 0][subband][tab];
+#endif
+#if NR_STATIONS >= 2
+  float2 weight_01 = (*weights)[ 1][subband][tab];
+#endif
+#if NR_STATIONS >= 3
+  float2 weight_02 = (*weights)[ 2][subband][tab];
+#endif
+#if NR_STATIONS >= 4
+  float2 weight_03 = (*weights)[ 3][subband][tab];
+#endif
+#if NR_STATIONS >= 5
+  float2 weight_04 = (*weights)[ 4][subband][tab];
+#endif
+#if NR_STATIONS >= 6
+  float2 weight_05 = (*weights)[ 5][subband][tab];
+#endif
+#if NR_STATIONS >= 7
+  float2 weight_06 = (*weights)[ 6][subband][tab];
+#endif
+#if NR_STATIONS >= 8
+  float2 weight_07 = (*weights)[ 7][subband][tab];
+#endif
+#if NR_STATIONS >= 9
+  float2 weight_08 = (*weights)[ 8][subband][tab];
+#endif
+#if NR_STATIONS >= 10
+  float2 weight_09 = (*weights)[ 9][subband][tab];
+#endif
+#if NR_STATIONS >= 11
+  float2 weight_10 = (*weights)[10][subband][tab];
+#endif
+#if NR_STATIONS >= 12
+  float2 weight_11 = (*weights)[11][subband][tab];
+#endif
+#if NR_STATIONS >= 13
+  float2 weight_12 = (*weights)[12][subband][tab];
+#endif
+#if NR_STATIONS >= 14
+  float2 weight_13 = (*weights)[13][subband][tab];
+#endif
+#if NR_STATIONS >= 15
+  float2 weight_14 = (*weights)[14][subband][tab];
+#endif
+#if NR_STATIONS >= 16
+  float2 weight_15 = (*weights)[15][subband][tab];
+#endif
+#if NR_STATIONS >= 17
+  float2 weight_16 = (*weights)[16][subband][tab];
+#endif
+#if NR_STATIONS >= 18
+  float2 weight_17 = (*weights)[17][subband][tab];
+#endif
+#if NR_STATIONS >= 19
+  float2 weight_18 = (*weights)[18][subband][tab];
+#endif
+#if NR_STATIONS >= 20
+  float2 weight_19 = (*weights)[19][subband][tab];
+#endif
+#if NR_STATIONS >= 21
+  float2 weight_20 = (*weights)[20][subband][tab];
+#endif
+#if NR_STATIONS >= 22
+  float2 weight_21 = (*weights)[21][subband][tab];
+#endif
+#if NR_STATIONS >= 23
+  float2 weight_22 = (*weights)[22][subband][tab];
+#endif
+#if NR_STATIONS >= 24
+  float2 weight_23 = (*weights)[23][subband][tab];
+#endif
+
+  for (uint time = 0; time < NR_TIMES_PER_BLOCK + NR_STATION_FILTER_TAPS - 1; time += 16) {
+    for (uint i = get_local_id(0) + NR_POLARIZATIONS * get_local_id(1); i < (NR_STATIONS >= 24 ? 24 : NR_STATIONS) * 16 * NR_POLARIZATIONS; i += NR_TABS * NR_POLARIZATIONS) {
+      uint p = i % NR_POLARIZATIONS;
+      uint t = (i / NR_POLARIZATIONS) % 16;
+      uint s = i / NR_POLARIZATIONS / 16;
+
+      if (time + t < NR_TIMES_PER_BLOCK + NR_STATION_FILTER_TAPS - 1)
+        local_samples[0][0][i] = convert_float2((*samples)[s][subband][time + t][p]);
+    }
+
+    barrier(CLK_LOCAL_MEM_FENCE);
+
+    for (uint t = 0; t < min(16U, (NR_TIMES_PER_BLOCK + NR_STATION_FILTER_TAPS - 1 - time)); t++) {
+      float2 sum = 0;
+
+#if NR_STATIONS >= 1
+      sample = local_samples[ 0][t][pol];
+      sum += weight_00.xx * sample;
+      sum += weight_00.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 2
+      sample = local_samples[ 1][t][pol];
+      sum += weight_01.xx * sample;
+      sum += weight_01.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 3
+      sample = local_samples[ 2][t][pol];
+      sum += weight_02.xx * sample;
+      sum += weight_02.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 4
+      sample = local_samples[ 3][t][pol];
+      sum += weight_03.xx * sample;
+      sum += weight_03.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 5
+      sample = local_samples[ 4][t][pol];
+      sum += weight_04.xx * sample;
+      sum += weight_04.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 6
+      sample = local_samples[ 5][t][pol];
+      sum += weight_05.xx * sample;
+      sum += weight_05.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 7
+      sample = local_samples[ 6][t][pol];
+      sum += weight_06.xx * sample;
+      sum += weight_06.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 8
+      sample = local_samples[ 7][t][pol];
+      sum += weight_07.xx * sample;
+      sum += weight_07.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 9
+      sample = local_samples[ 8][t][pol];
+      sum += weight_08.xx * sample;
+      sum += weight_08.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 10
+      sample = local_samples[ 9][t][pol];
+      sum += weight_09.xx * sample;
+      sum += weight_09.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 11
+      sample = local_samples[10][t][pol];
+      sum += weight_10.xx * sample;
+      sum += weight_10.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 12
+      sample = local_samples[11][t][pol];
+      sum += weight_11.xx * sample;
+      sum += weight_11.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 13
+      sample = local_samples[12][t][pol];
+      sum += weight_12.xx * sample;
+      sum += weight_12.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 14
+      sample = local_samples[13][t][pol];
+      sum += weight_13.xx * sample;
+      sum += weight_13.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 15
+      sample = local_samples[14][t][pol];
+      sum += weight_14.xx * sample;
+      sum += weight_14.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 16
+      sample = local_samples[15][t][pol];
+      sum += weight_15.xx * sample;
+      sum += weight_15.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 17
+      sample = local_samples[16][t][pol];
+      sum += weight_16.xx * sample;
+      sum += weight_16.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 18
+      sample = local_samples[17][t][pol];
+      sum += weight_17.xx * sample;
+      sum += weight_17.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 19
+      sample = local_samples[18][t][pol];
+      sum += weight_18.xx * sample;
+      sum += weight_18.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 20
+      sample = local_samples[19][t][pol];
+      sum += weight_19.xx * sample;
+      sum += weight_19.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 21
+      sample = local_samples[20][t][pol];
+      sum += weight_20.xx * sample;
+      sum += weight_20.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 22
+      sample = local_samples[21][t][pol];
+      sum += weight_21.xx * sample;
+      sum += weight_21.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 23
+      sample = local_samples[22][t][pol];
+      sum += weight_22.xx * sample;
+      sum += weight_22.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 24
+      sample = local_samples[23][t][pol];
+      sum += weight_23.xx * sample;
+      sum += weight_23.yy * (float2) (-sample.y, sample.x);
+#endif
+
+      (*complexVoltages)[subband][time + t][tab][pol] = sum;
+    }
+
+    barrier(CLK_LOCAL_MEM_FENCE);
+  }
+
+#if NR_STATIONS > 24
+#if NR_STATIONS >= 25
+  float2 weight_24 = (*weights)[24][subband][tab];
+#endif
+#if NR_STATIONS >= 26
+  float2 weight_25 = (*weights)[25][subband][tab];
+#endif
+#if NR_STATIONS >= 27
+  float2 weight_26 = (*weights)[26][subband][tab];
+#endif
+#if NR_STATIONS >= 28
+  float2 weight_27 = (*weights)[27][subband][tab];
+#endif
+#if NR_STATIONS >= 29
+  float2 weight_28 = (*weights)[28][subband][tab];
+#endif
+#if NR_STATIONS >= 30
+  float2 weight_29 = (*weights)[29][subband][tab];
+#endif
+#if NR_STATIONS >= 31
+  float2 weight_30 = (*weights)[30][subband][tab];
+#endif
+#if NR_STATIONS >= 32
+  float2 weight_31 = (*weights)[31][subband][tab];
+#endif
+#if NR_STATIONS >= 33
+  float2 weight_32 = (*weights)[32][subband][tab];
+#endif
+#if NR_STATIONS >= 34
+  float2 weight_33 = (*weights)[33][subband][tab];
+#endif
+#if NR_STATIONS >= 35
+  float2 weight_34 = (*weights)[34][subband][tab];
+#endif
+#if NR_STATIONS >= 36
+  float2 weight_35 = (*weights)[35][subband][tab];
+#endif
+#if NR_STATIONS >= 37
+  float2 weight_36 = (*weights)[36][subband][tab];
+#endif
+#if NR_STATIONS >= 38
+  float2 weight_37 = (*weights)[37][subband][tab];
+#endif
+#if NR_STATIONS >= 39
+  float2 weight_38 = (*weights)[38][subband][tab];
+#endif
+#if NR_STATIONS >= 40
+  float2 weight_39 = (*weights)[39][subband][tab];
+#endif
+#if NR_STATIONS >= 41
+  float2 weight_40 = (*weights)[40][subband][tab];
+#endif
+#if NR_STATIONS >= 42
+  float2 weight_41 = (*weights)[41][subband][tab];
+#endif
+#if NR_STATIONS >= 43
+  float2 weight_42 = (*weights)[42][subband][tab];
+#endif
+#if NR_STATIONS >= 44
+  float2 weight_43 = (*weights)[43][subband][tab];
+#endif
+#if NR_STATIONS >= 45
+  float2 weight_44 = (*weights)[44][subband][tab];
+#endif
+#if NR_STATIONS >= 46
+  float2 weight_45 = (*weights)[45][subband][tab];
+#endif
+#if NR_STATIONS >= 47
+  float2 weight_46 = (*weights)[46][subband][tab];
+#endif
+#if NR_STATIONS >= 48
+  float2 weight_47 = (*weights)[47][subband][tab];
+#endif
+
+  for (uint time = 0; time < NR_TIMES_PER_BLOCK + NR_STATION_FILTER_TAPS - 1; time += 16) {
+    for (uint i = get_local_id(0) + NR_POLARIZATIONS * get_local_id(1); i < (NR_STATIONS - 24) * 16 * NR_POLARIZATIONS; i += NR_TABS * NR_POLARIZATIONS) {
+      uint p = i % NR_POLARIZATIONS;
+      uint t = (i / NR_POLARIZATIONS) % 16;
+      uint s = i / NR_POLARIZATIONS / 16;
+
+      if (time + t < NR_TIMES_PER_BLOCK + NR_STATION_FILTER_TAPS - 1)
+        local_samples[0][0][i] = convert_float2((*samples)[24 + s][subband][time + t][p]);
+    }
+
+    barrier(CLK_LOCAL_MEM_FENCE);
+
+    for (uint t = 0; t < min(16U, (NR_TIMES_PER_BLOCK + NR_STATION_FILTER_TAPS - 1 - time)); t++) {
+      float2 sum = (*complexVoltages)[subband][time + t][tab][pol];
+
+#if NR_STATIONS >= 25
+      sample = local_samples[ 0][t][pol];
+      sum += weight_24.xx * sample;
+      sum += weight_24.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 26
+      sample = local_samples[ 1][t][pol];
+      sum += weight_25.xx * sample;
+      sum += weight_25.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 27
+      sample = local_samples[ 2][t][pol];
+      sum += weight_26.xx * sample;
+      sum += weight_26.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 28
+      sample = local_samples[ 3][t][pol];
+      sum += weight_27.xx * sample;
+      sum += weight_27.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 29
+      sample = local_samples[ 4][t][pol];
+      sum += weight_28.xx * sample;
+      sum += weight_28.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 30
+      sample = local_samples[ 5][t][pol];
+      sum += weight_29.xx * sample;
+      sum += weight_29.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 31
+      sample = local_samples[ 6][t][pol];
+      sum += weight_30.xx * sample;
+      sum += weight_30.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 32
+      sample = local_samples[ 7][t][pol];
+      sum += weight_31.xx * sample;
+      sum += weight_31.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 33
+      sample = local_samples[ 8][t][pol];
+      sum += weight_32.xx * sample;
+      sum += weight_32.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 34
+      sample = local_samples[ 9][t][pol];
+      sum += weight_33.xx * sample;
+      sum += weight_33.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 35
+      sample = local_samples[10][t][pol];
+      sum += weight_34.xx * sample;
+      sum += weight_34.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 36
+      sample = local_samples[11][t][pol];
+      sum += weight_35.xx * sample;
+      sum += weight_35.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 37
+      sample = local_samples[12][t][pol];
+      sum += weight_36.xx * sample;
+      sum += weight_36.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 38
+      sample = local_samples[13][t][pol];
+      sum += weight_37.xx * sample;
+      sum += weight_37.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 39
+      sample = local_samples[14][t][pol];
+      sum += weight_38.xx * sample;
+      sum += weight_38.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 40
+      sample = local_samples[15][t][pol];
+      sum += weight_39.xx * sample;
+      sum += weight_39.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 41
+      sample = local_samples[16][t][pol];
+      sum += weight_40.xx * sample;
+      sum += weight_40.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 42
+      sample = local_samples[17][t][pol];
+      sum += weight_41.xx * sample;
+      sum += weight_41.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 43
+      sample = local_samples[18][t][pol];
+      sum += weight_42.xx * sample;
+      sum += weight_42.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 44
+      sample = local_samples[19][t][pol];
+      sum += weight_43.xx * sample;
+      sum += weight_19.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 45
+      sample = local_samples[20][t][pol];
+      sum += weight_44.xx * sample;
+      sum += weight_44.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 46
+      sample = local_samples[21][t][pol];
+      sum += weight_45.xx * sample;
+      sum += weight_45.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 47
+      sample = local_samples[22][t][pol];
+      sum += weight_46.xx * sample;
+      sum += weight_46.yy * (float2) (-sample.y, sample.x);
+#endif
+
+#if NR_STATIONS >= 48
+      sample = local_samples[23][t][pol];
+      sum += weight_47.xx * sample;
+      sum += weight_47.yy * (float2) (-sample.y, sample.x);
+#endif
+
+      (*complexVoltages)[subband][time + t][tab][pol] = sum;
+    }
+
+    barrier(CLK_LOCAL_MEM_FENCE);
+  }
+#endif
+}

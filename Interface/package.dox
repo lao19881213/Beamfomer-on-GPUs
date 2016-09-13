@@ -1,0 +1,8 @@
+/**
+
+\ingroup RTCP
+\defgroup Interface Interface
+
+The RTCP Interface package contains classes and interface definitions used by the different RTCP packages.
+
+*/

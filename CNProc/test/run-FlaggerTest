@@ -1,0 +1,27 @@
+#!/bin/bash
+
+export NR_PSETS=5
+export PSET_SIZE=32
+export CN_STREAM_TYPE=PIPE
+export CNPROC_PORT=3999
+export THREADS=2
+
+export INSTALL_DIR=~/workspace/LOFAR-build/gnu_opt/installed
+#export INSTALL_DIR=~/workspace/LOFAR-build/gnu_debug/installed
+
+export PARSET=/home/rob/workspace/LOFAR/RTCP/CNProc/test/FlaggerTest.parset
+#export PARSET=/home/rob/workspace/LOFAR/RTCP/CNProc/test/FlaggerTest-1subband.parset
+
+# Start IONProc nrPsets times
+# start CNProc #cores in pset times
+
+mkdir -p /tmp/rob
+rm -rf /tmp/ion-cn-* ion-storage-* /tmp/SB???.*
+mpirun -H r815,r815,r815,r815,r815 $INSTALL_DIR/bin/ION_Processing &
+mpirun -H r815,r815,r815,r815,r815,r815,r815,r815,r815,r815,r815,r815,r815,r815,r815,r815,r815,r815,r815,r815,r815,r815,r815 -x OMP_NUM_THREADS=$THREADS $INSTALL_DIR/bin/CN_Processing &
+echo parset $PARSET|/home/rob/workspace/LOFAR/udp-copy - tcp:r815:$CNPROC_PORT
+
+echo quit|/home/rob/workspace/LOFAR/udp-copy - tcp:r815:$CNPROC_PORT
+wait
+wait
+rm -f /tmp/ion-cn-*

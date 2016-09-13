@@ -1,0 +1,188 @@
+# ----- Generic information
+Observation.ObserverName = "Developer"
+Observation.ProjectName = "Development"
+Observation.Campaign.CO_I = ""
+Observation.Campaign.PI = "Developer"
+Observation.Campaign.contact = ""
+Observation.Campaign.name = "Development"
+Observation.Campaign.title = "Development"
+
+# ----- Input streams
+Observation.VirtualInstrument.stationList = [S33]
+#Observation.antennaSet=LBA_INNER
+#Observation.antennaSet=LBA_OUTER
+#Observation.antennaSet=LBA_X
+#Observation.antennaSet=LBA_Y
+#Observation.antennaSet=LBA_SPARSE_EVEN
+#Observation.antennaSet=LBA_SPARSE_ODD
+#Observation.antennaSet=HBA_ZERO
+#Observation.antennaSet=HBA_ONE
+#Observation.antennaSet=HBA_DUAL
+#Observation.antennaSet=HBA_JOINED
+#Observation.antennaSet=LBA_INNER
+Observation.antennaSet=
+
+OLAP.realTime = T # T when reading data from stations, F when reading from disk
+
+Observation.nrPolarisations = 2
+Observation.nrSlotsInFrame = 61 # the number of subbands
+OLAP.nrTimesInFrame = 16
+
+# Eg. [ 300..303, 40 ] --> [ 300,301,302,303,40 ]
+#     [ 10*0         ] --> [ 0,0,0,0,0,0,0,0,0,0 ]
+#     [ 3*(0;1;2;3)  ] --> [ 0,1,2,3,0,1,2,3,0,1,2,3 ]
+#     [ 3*(300..303) ] --> [ 300,301,302,303,300,301,302,303,300,301,302,303 ]
+#     [ 2*(5*0)      ] --> [ 0,0,0,0,0,0,0,0,0,0 ]       
+Observation.subbandList  = [100..110]
+Observation.sampleClock  = 200
+Observation.nrBitsPerSample = 16
+
+# Observation.{beamList,rspBoardList,rspSlotList} are automatically derived from Observation.subbandList
+#Observation.beamList     = [244*0]
+#Observation.rspBoardList = [61*0,61*1,61*2,61*3]
+#Observation.rspSlotList  = [0..60,0..60,0..60,0..60]
+
+
+# Common coordinates are included at the bottom
+Observation.nrBeams = 1
+Observation.Beam[0].angle1 = 5.2336866848083394 # Cygnus
+Observation.Beam[0].angle2 = 0.71094251447010637
+Observation.Beam[0].directionType = J2000
+
+Observation.Beam[0].nrTiedArrayBeams = 0
+Observation.Beam[0].TiedArrayBeam[0].angle1 = 0
+Observation.Beam[0].TiedArrayBeam[0].angle2 = 0
+Observation.Beam[0].TiedArrayBeam[0].directionType = J2000
+Observation.Beam[0].TiedArrayBeam[0].dispersionMeasure = 0
+Observation.Beam[0].TiedArrayBeam[0].coherent = T
+#Observation.Beam[0].TiedArrayBeam[1].angle1 = 0
+#Observation.Beam[0].TiedArrayBeam[1].angle2 = 0
+#Observation.Beam[0].TiedArrayBeam[1].directionType = J2000
+#Observation.Beam[0].TiedArrayBeam[1].dispersionMeasure = 1.2
+#Observation.Beam[0].TiedArrayBeam[2].angle1 = 0
+#Observation.Beam[0].TiedArrayBeam[2].angle2 = 0
+#Observation.Beam[0].TiedArrayBeam[2].directionType = J2000
+#Observation.Beam[0].TiedArrayBeam[2].dispersionMeasure = 1.3
+
+# ----- Output streams
+OLAP.Storage.hosts = [locus095]
+OLAP.Storage.targetDirectory = /data # will be appended with dirmask and filenammask
+
+Observation.DataProducts.Output_Beamformed.enabled = F
+Observation.DataProducts.Output_Correlated.enabled = T
+Observation.DataProducts.Output_Trigger.enabled = F
+
+Observation.DataProducts.Output_Correlated.namemask = L${OBSID}_SB${SUBBAND}_uv.MS
+Observation.DataProducts.Output_Beamformed.namemask = L${OBSID}_B${BEAM}_S${STOKES}_P${PART}_bf.raw
+Observation.DataProducts.Output_Trigger.namemask = L${OBSID}_B${BEAM}_S${STOKES}_P${PART}_bf.trigger
+
+Observation.channelsPerSubband = 1
+
+OLAP.delayCompensation = F
+OLAP.coherentDedisperseChannels = F
+
+OLAP.correctBandPass = F
+#Observation.bandFilter = LBA_10_90
+Observation.bandFilter = LBA_30_90
+#Observation.bandFilter = HBA_110_190
+#Observation.bandFilter = HBA_170_230
+#Observation.bandFilter = HBA_210_250
+
+OLAP.Correlator.integrationTime = 1.0
+#OLAP.IONProc.integrationSteps = 1   # (generated)
+#OLAP.CNProc.integrationSteps  = 768 # (generated, multiple of 128 for pencil beams)
+
+OLAP.CNProc_CoherentStokes.subbandsPerFile = 15
+OLAP.CNProc_CoherentStokes.which = XXYY               # I or IQUV or XXYY
+OLAP.CNProc_CoherentStokes.timeIntegrationFactor = 1  # time integration
+OLAP.CNProc_CoherentStokes.channelsPerSubband = 0     # 0 = same as observation
+
+OLAP.CNProc_IncoherentStokes.subbandsPerFile = 244
+OLAP.CNProc_IncoherentStokes.which = I                # I or IQUV or XXYY
+OLAP.CNProc_IncoherentStokes.timeIntegrationFactor = 1 # time integration
+OLAP.CNProc_IncoherentStokes.channelsPerSubband = 0   # 0 = same as observation
+
+# ----- Beam forming
+OLAP.PencilInfo.flysEye = T           # don't form pencil beams, but turn stations
+                                   # into pencil beams
+
+OLAP.PencilInfo.nrRings = 0 # 0 = just the central beam
+OLAP.PencilInfo.ringSize = 0.01
+
+# Eg. tiedArray beamforming
+#Observation.Beamformer[0].stationList = "B01_0,B01_1"
+#Observation.Beamformer[1].stationList = "B01_2,B01_3"
+
+# ----- CNProc internals
+# Transports should be one of FCNP, TCP, NULL.  This works for IONProc, but not for
+# CNProc, since CNProc does not open the parset file!
+OLAP.OLAP_Conn.IONProc_CNProc_Transport = FCNP
+
+# generate fake station input, overriding any real data
+OLAP.CNProc.fakeInputData = T
+OLAP.CNProc.checkFakeInputData = F
+
+OLAP.CNProc.nrPPFTaps = 16
+
+# Phase 1: Handle input from stations. The stations used determine which psets
+# are in phase 1, so typically, the python environment will fill this in.
+#OLAP.CNProc.phaseOnePsets = [0]
+
+# Phase 2: Performs the correlation and beam forming. Outputs imaging data.
+# (FilteredData and CorrelatedData). Any set of psets can be used for this phase.
+#OLAP.CNProc.phaseTwoPsets = [0]
+
+# Phase 3: Transposed beam formed data and operations on them. Psets used in phase
+# 3 are either disjunct from those in phase 1 and 2, or the same as the psets for
+# phase 1+2.
+#OLAP.CNProc.phaseThreePsets = [0]
+
+# Define which cores to use in the psets. usedCoresInPset defines the total set
+# of cores reserved for this observation. phaseOneTwoCores and phaseThreeCores are
+# subsets of usedCoresInPset, and are either equal or disjunct.
+OLAP.CNProc.usedCoresInPset = [0..63]
+#OLAP.CNProc.phaseOneTwoCores = [0..63]
+#OLAP.CNProc.phaseThreeCores = [0..63]
+
+# NOTE: Phase 3 is expected to use one out of the following configurations:
+# 1) Which psets and cores equal with phase 1+2, i.e.
+#       phaseThreePsets = phaseTwoPsets
+#       phaseThreeCores = phaseOneTwoCores = usedCoresInPset
+# 2) Disjunct psets, all phases use all cores:
+#       |phaseTwoPsets+phaseThreePsets| = |phaseTwoPsets| + |phaseThreePsets|
+#       phaseThreeCores = phaseOneTwoCores = usedCoresInPset
+# 3) Disjunct cores, all phases use the same psets:
+#       phaseThreePsets = phaseTwoPsets
+#       |phaseOneTwoCores+phaseThreeCores| = |phaseOneTwoCores| + |phaseThreeCores| = usedCoresInPset
+# Not all cores in usedCoresInPset have to be used, but it makes no sense not to.
+
+# ----- IONProc internals
+OLAP.DelayComp.positionType = ITRF  # should be ITRF
+OLAP.DelayComp.nrCalcDelays = 16
+OLAP.nrSecondsOfBuffer = 2.5
+OLAP.maxNetworkDelay = 0.5
+
+# ----- Storage internals
+OLAP.OLAP_Conn.IONProc_Storage_Transport = TCP
+#OLAP.OLAP_Conn.IONProc_Storage_Ports = [6300..7291] # only define this if you want specific ports to be used
+
+# ----- Coordinates of common sources
+#Observation.Beam[0].angle1 = 0                  # NCP
+#Observation.Beam[0].angle2 = 1.570796327
+#Observation.Beam[0].angle1 = 5.0690771897724982  # PSR B1919+21 
+#Observation.Beam[0].angle2 = 0.38194712046815321
+#Observation.Beam[0].angle1 = 0.9293418663522305  # PSR B0329+54 
+#Observation.Beam[0].angle2 = 0.9525792284909524 
+#Observation.Beam[0].angle1 = 3.314704691633744   # Pulsar
+#Observation.Beam[0].angle2 = 0.434535060205780
+#Observation.Beam[0].angle1 = 6.1234876806221052 # Cas A
+#Observation.Beam[0].angle2 = 1.0265153995604648
+#Observation.Beam[0].angle1 = 5.2336866848083394 # Cygnus
+#Observation.Beam[0].angle2 = 0.71094251447010637
+#Observation.Beam[2].angle1 = 0.9293418663522305 # pulsar
+#Observation.Beam[2].angle2 = 0.9525792284909524 
+#Observation.Beam[0].angle1 = 5.62942569373173 # Jupiter
+#Observation.Beam[0].angle2 = -0.268760827446199 
+#Observation.Beam[0].angle1 = 1.4596748494230258 # Taurus
+#Observation.Beam[0].angle2 = 0.38422502336661052
+

@@ -1,0 +1,47 @@
+Observation.subbandList		= [384]
+Observation.nyquistZone		= 1
+Observation.sampleClock		= 160
+Observation.channelsPerSubband	= 256
+OLAP.CNProc.nrPPFTaps		= 16
+Observation.nrPolarisations	= 2
+OLAP.CNProc.coresPerPset	= 64
+OLAP.CNProc.inputPsets		= []
+OLAP.CNProc.outputPsets	        = [0]
+OLAP.storageStationNames	= ["CS001"]
+OLAP.IONProc.useGather		= T
+OLAP.subbandsPerPset		= 1
+OLAP.CNProc.integrationSteps	= 608
+OLAP.delayCompensation		= T
+OLAP.DelayComp.nrCalcDelays	= 16
+OLAP.DelayComp.positionType	= ITRF
+
+Observation.nrSlotsInFrame	= 36
+Observation.beamList		= [0,1]
+Observation.rspBoardList	= [0,0]
+Observation.rspSlotList		= [0,1]
+
+Observation.startTime			= 2009-01-01 00:00:00.000
+
+OLAP.CNProc.partition				= R00-M0-N00-256
+PIC.Core.IONProc.R00-M0-N00-256[0].inputs	= ["CS001/RSP0"]
+
+# NCP
+Observation.Beam[0].directionType	= J2000
+Observation.Beam[0].nrTiedArrayBeams	= 0
+Observation.Beam[0].angle1		= 0
+Observation.Beam[0].angle2		= 1.570796327
+
+# SUN
+Observation.Beam[1].directionType	= SUN
+Observation.Beam[1].nrTiedArrayBeams	= 0
+Observation.Beam[1].angle1		= 0
+Observation.Beam[1].angle2		= 0
+
+OLAP.nrPencils				= 0
+OLAP.PencilInfo.nrRings			= 0
+OLAP.PencilInfo.ringSize		= 0
+
+PIC.Core.CS001.phaseCenter = [3826967.298, 460904.345, 5064613.055]
+PIC.Core.CS001.position = [3826967.298, 460904.345, 5064613.055]
+
+Observation.referencePhaseCenter =   [3826577.110, 461022.900, 5064892.758]

@@ -1,0 +1,119 @@
+{
+   MPI uninitialised memory usage
+   Memcheck:Param
+   sched_setaffinity(mask)
+   fun:syscall
+   fun:opal_paffinity_linux_plpa_api_probe_init
+   fun:opal_paffinity_linux_plpa_have_topology_information
+   fun:linux_module_init
+   fun:opal_paffinity_base_select
+   fun:opal_init
+   fun:orte_init
+   fun:ompi_mpi_init
+   fun:PMPI_Init
+   fun:main
+}
+{
+   MPI leak
+   Memcheck:Leak
+   ...
+   fun:ompi_mpi_init
+}
+{
+   MPI leak
+   Memcheck:Leak
+   ...
+   fun:mca_pml_base_open
+}
+{
+   MPI leak
+   Memcheck:Leak
+   ...
+   fun:PMPI_Init
+   fun:main
+}
+{
+   MPI leak
+   Memcheck:Leak
+   ...
+   fun:PMPI_Finalize
+   fun:main
+}
+{
+   MPI leak
+   Memcheck:Leak
+   ...
+   fun:orte_init
+}
+{
+   MPI leak
+   Memcheck:Leak
+   ...
+   fun:orte_ess_base_app_setup
+}
+{
+   MPI leak
+   Memcheck:Leak
+   ...
+   fun:rte_init
+}
+{
+   pthread stack cache
+   Memcheck:Leak
+   ...
+   fun:_dl_allocate_tls
+   fun:pthread_create*
+   ...
+}
+{
+   casacore static variables
+   Memcheck:Leak
+   fun:_Znwj
+   fun:_ZNK4casa9LogFilter5cloneEv
+   ...
+}
+{
+   casacore static variables
+   Memcheck:Leak
+   fun:_Znwj
+   fun:_ZN4casa7LogSinkC1ENS_10LogMessage8PriorityEb
+   ...
+}
+{
+   casacore static variables
+   Memcheck:Leak
+   fun:_Znwj
+   fun:_ZN4casa10CountedPtrINS_16LogSinkInterfaceEEC1EPS1_b
+   ...
+}
+{
+   casacore static variables
+   Memcheck:Leak
+   fun:_Znaj
+   fun:_ZN4casa8MeasIERS8openNoteEPFvvE
+   ...
+}
+{
+   casacore static variables
+   Memcheck:Leak
+   fun:_Znaj
+   fun:_ZN4casa9MeasTable4dUTCEd
+   ...
+}
+{
+   LogCout static variables
+   Memcheck:Leak
+   fun:_Znwj
+   fun:_ZN5LOFAR7LFDebug8setLevelERKSsi
+   ...
+}
+{
+   LogCout static variables
+   Memcheck:Leak
+   fun:_Znwj
+   fun:_ZNSt8_Rb_treeISsSt4pairIKSsiESt10_Select1stIS2_ESt4lessISsESaIS2_EE9_M_insertEPSt18_Rb_tree_node_baseSA_RKS2_
+   fun:_ZNSt8_Rb_treeISsSt4pairIKSsiESt10_Select1stIS2_ESt4lessISsESaIS2_EE13insert_uniqueERKS2_
+   fun:_ZNSt8_Rb_treeISsSt4pairIKSsiESt10_Select1stIS2_ESt4lessISsESaIS2_EE13insert_uniqueESt17_Rb_tree_iteratorIS2_ERKS2_
+   fun:_ZN5LOFAR7LFDebug8setLevelERKSsi
+   ...
+}

@@ -1,0 +1,24 @@
+#!/bin/bash
+
+export NR_PSETS=5
+export PSET_SIZE=3
+export CN_STREAM_TYPE=PIPE
+export CNPROC_PORT=3999
+
+export OMP_NUM_THREADS=8
+
+export INSTALL_DIR=~/workspace/LOFAR-build/gnu_opt/installed
+#export INSTALL_DIR=~/workspace/LOFAR-build/gnu_debug/installed
+
+export OUTPUT_DIR=/home/rob/workspace/LOFAR-output
+
+rm -rf /tmp/ion-cn-* ion-storage-* $OUTPUT_DIR
+mkdir -p $OUTPUT_DIR
+mpirun -H localhost,localhost,localhost,localhost,localhost $INSTALL_DIR/bin/ION_Processing &
+mpirun -H localhost,localhost,localhost,localhost,localhost,localhost,localhost,localhost,localhost,localhost,localhost,localhost,localhost,localhost,localhost $INSTALL_DIR/bin/CN_Processing &
+echo parset /home/rob/workspace/LOFAR/RTCP/CNProc/test/RFI-test.parset|/home/rob/workspace/LOFAR/udp-copy - tcp:localhost:$CNPROC_PORT
+echo quit|/home/rob/workspace/LOFAR/udp-copy - tcp:localhost:$CNPROC_PORT
+wait
+wait
+rm -f /tmp/ion-cn-*
+for i in $OUTPUT_DIR/SB*/table.f0data;do ~/workspace/LOFAR/patch_seqno $i 131072;done

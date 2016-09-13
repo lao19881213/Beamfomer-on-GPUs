@@ -1,0 +1,180 @@
+#undef USE_WARP_SHUFFLE_INSN // FIXME: Broken
+
+#if NR_BITS_PER_SAMPLE == 8
+typedef char2 SampleType;
+#else
+typedef short2 SampleType;
+#endif
+
+
+typedef __global float2 (*ComplexVoltagesType)[NR_SUBBANDS][NR_SAMPLES_PER_SUBBAND + NR_STATION_FILTER_TAPS - 1][NR_TABS][NR_POLARIZATIONS];
+typedef __global SampleType (*SamplesType)[NR_STATIONS][NR_SUBBANDS][NR_SAMPLES_PER_SUBBAND + NR_STATION_FILTER_TAPS - 1][NR_POLARIZATIONS];
+typedef __global float2 (*WeightsType)[NR_STATIONS][NR_SUBBANDS][NR_TABS];
+
+float2 cmul(float2 a, float2 b)
+{
+  return (float2) { a.x * b.x - a.y * b.y, a.x * b.y + a.y * b.x };
+}
+
+
+__kernel void complexVoltages(__global void *complexVoltagesPtr,
+                              __global const void *samplesPtr,
+                              __global const void *weightsPtr)
+{
+  ComplexVoltagesType complexVoltages = (ComplexVoltagesType) complexVoltagesPtr;
+  SamplesType samples = (SamplesType) samplesPtr;
+  WeightsType weights = (WeightsType) weightsPtr;
+
+#if defined USE_WARP_SHUFFLE_INSN
+  uint first_tab = 3 * get_local_id(1);
+  uint first_station = 6 * get_local_id(0);
+#else
+  uint pol = get_local_id(0) & 1;
+  uint tab_group = (get_local_id(0) >> 1) % (NR_TABS / 3);
+  uint station_group = (get_local_id(0) >> 1) / (NR_TABS / 3);
+  uint first_tab = 3 * tab_group;
+  uint first_station = 6 * station_group;
+#endif
+  uint subband = get_global_id(1);
+
+  bool lastGroupOfStations = first_station + 6 == NR_STATIONS;
+
+  float2 weight_0_0 = (*weights)[first_station + 0][subband][first_tab + 0];
+  float2 weight_0_1 = (*weights)[first_station + 0][subband][first_tab + 1];
+  float2 weight_0_2 = (*weights)[first_station + 0][subband][first_tab + 2];
+  float2 weight_1_0 = (*weights)[first_station + 1][subband][first_tab + 0];
+  float2 weight_1_1 = (*weights)[first_station + 1][subband][first_tab + 1];
+  float2 weight_1_2 = (*weights)[first_station + 1][subband][first_tab + 2];
+  float2 weight_2_0 = (*weights)[first_station + 2][subband][first_tab + 0];
+  float2 weight_2_1 = (*weights)[first_station + 2][subband][first_tab + 1];
+  float2 weight_2_2 = (*weights)[first_station + 2][subband][first_tab + 2];
+  float2 weight_3_0 = (*weights)[first_station + 3][subband][first_tab + 0];
+  float2 weight_3_1 = (*weights)[first_station + 3][subband][first_tab + 1];
+  float2 weight_3_2 = (*weights)[first_station + 3][subband][first_tab + 2];
+  float2 weight_4_0 = (*weights)[first_station + 4][subband][first_tab + 0];
+  float2 weight_4_1 = (*weights)[first_station + 4][subband][first_tab + 1];
+  float2 weight_4_2 = (*weights)[first_station + 4][subband][first_tab + 2];
+  float2 weight_5_0 = (*weights)[first_station + 5][subband][first_tab + 0];
+  float2 weight_5_1 = (*weights)[first_station + 5][subband][first_tab + 1];
+  float2 weight_5_2 = (*weights)[first_station + 5][subband][first_tab + 2];
+
+#if !defined USE_WARP_SHUFFLE_INSN
+  __local float2 local_sums[3][NR_STATIONS / 6][NR_TABS / 3][NR_POLARIZATIONS];
+#endif
+
+  float2 sample_0, sample_1, sample_2, sample_3, sample_4, sample_5;
+  float2 sum_0, sum_1, sum_2;
+
+#if !defined USE_WARP_SHUFFLE_INSN
+  if (first_station == 0) {
+    local_sums[0][0][tab_group][pol] = 0;
+    local_sums[1][0][tab_group][pol] = 0;
+    local_sums[2][0][tab_group][pol] = 0;
+  }
+#endif
+
+  for (int time = 0 - station_group; time < (int) (NR_SAMPLES_PER_SUBBAND + NR_STATION_FILTER_TAPS - 1 + NR_STATIONS / 6 - 1 - station_group); time++) {
+    bool validTime = time >= 0 && time < NR_SAMPLES_PER_SUBBAND + NR_STATION_FILTER_TAPS - 1;
+
+    if (validTime) {
+      sample_0 = convert_float2((*samples)[first_station + 0][subband][time][pol]);
+      sample_1 = convert_float2((*samples)[first_station + 1][subband][time][pol]);
+      sample_2 = convert_float2((*samples)[first_station + 2][subband][time][pol]);
+      sample_3 = convert_float2((*samples)[first_station + 3][subband][time][pol]);
+      sample_4 = convert_float2((*samples)[first_station + 4][subband][time][pol]);
+      sample_5 = convert_float2((*samples)[first_station + 5][subband][time][pol]);
+    }
+
+
+#if !defined USE_WARP_SHUFFLE_INSN
+    barrier(CLK_LOCAL_MEM_FENCE);
+#endif
+
+    if (validTime) {
+#if !defined USE_WARP_SHUFFLE_INSN
+      sum_0 = local_sums[0][station_group][tab_group][pol];
+      sum_1 = local_sums[1][station_group][tab_group][pol];
+      sum_2 = local_sums[2][station_group][tab_group][pol];
+#else
+      asm ("shfl.up.b32 %0, %0, 1, 0x00;" : "=r" (sum_0.x) : "0" (sum_0.x));
+      asm ("shfl.up.b32 %0, %0, 1, 0x00;" : "=r" (sum_0.y) : "0" (sum_0.y));
+      asm ("shfl.up.b32 %0, %0, 1, 0x00;" : "=r" (sum_0.z) : "0" (sum_0.z));
+      asm ("shfl.up.b32 %0, %0, 1, 0x00;" : "=r" (sum_0.w) : "0" (sum_0.w));
+      asm ("shfl.up.b32 %0, %0, 1, 0x00;" : "=r" (sum_1.x) : "0" (sum_1.x));
+      asm ("shfl.up.b32 %0, %0, 1, 0x00;" : "=r" (sum_1.y) : "0" (sum_1.y));
+      asm ("shfl.up.b32 %0, %0, 1, 0x00;" : "=r" (sum_1.z) : "0" (sum_1.z));
+      asm ("shfl.up.b32 %0, %0, 1, 0x00;" : "=r" (sum_1.w) : "0" (sum_1.w));
+      asm ("shfl.up.b32 %0, %0, 1, 0x00;" : "=r" (sum_2.x) : "0" (sum_2.x));
+      asm ("shfl.up.b32 %0, %0, 1, 0x00;" : "=r" (sum_2.y) : "0" (sum_2.y));
+      asm ("shfl.up.b32 %0, %0, 1, 0x00;" : "=r" (sum_2.z) : "0" (sum_2.z));
+      asm ("shfl.up.b32 %0, %0, 1, 0x00;" : "=r" (sum_2.w) : "0" (sum_2.w));
+#endif
+
+      sum_0 += weight_0_0.xx * sample_0;
+      sum_1 += weight_0_1.xx * sample_0;
+      sum_2 += weight_0_2.xx * sample_0;
+      float2 sample_0_tr = (float2) (-sample_0.y, sample_0.x);
+      sum_0 += weight_0_0.yy * sample_0_tr;
+      sum_1 += weight_0_1.yy * sample_0_tr;
+      sum_2 += weight_0_2.yy * sample_0_tr;
+
+      sum_0 += weight_1_0.xx * sample_1;
+      sum_1 += weight_1_1.xx * sample_1;
+      sum_2 += weight_1_2.xx * sample_1;
+      float2 sample_1_tr = (float2) (-sample_1.y, sample_1.x);
+      sum_0 += weight_1_0.yy * sample_1_tr;
+      sum_1 += weight_1_1.yy * sample_1_tr;
+      sum_2 += weight_1_2.yy * sample_1_tr;
+
+      sum_0 += weight_2_0.xx * sample_2;
+      sum_1 += weight_2_1.xx * sample_2;
+      sum_2 += weight_2_2.xx * sample_2;
+      float2 sample_2_tr = (float2) (-sample_2.y, sample_2.x);
+      sum_0 += weight_2_0.yy * sample_2_tr;
+      sum_1 += weight_2_1.yy * sample_2_tr;
+      sum_2 += weight_2_2.yy * sample_2_tr;
+
+      sum_0 += weight_3_0.xx * sample_3;
+      sum_1 += weight_3_1.xx * sample_3;
+      sum_2 += weight_3_2.xx * sample_3;
+      float2 sample_3_tr = (float2) (-sample_3.y, sample_3.x);
+      sum_0 += weight_3_0.yy * sample_3_tr;
+      sum_1 += weight_3_1.yy * sample_3_tr;
+      sum_2 += weight_3_2.yy * sample_3_tr;
+
+      sum_0 += weight_4_0.xx * sample_4;
+      sum_1 += weight_4_1.xx * sample_4;
+      sum_2 += weight_4_2.xx * sample_4;
+      float2 sample_4_tr = (float2) (-sample_4.y, sample_4.x);
+      sum_0 += weight_4_0.yy * sample_4_tr;
+      sum_1 += weight_4_1.yy * sample_4_tr;
+      sum_2 += weight_4_2.yy * sample_4_tr;
+
+      sum_0 += weight_5_0.xx * sample_5;
+      sum_1 += weight_5_1.xx * sample_5;
+      sum_2 += weight_5_2.xx * sample_5;
+      float2 sample_5_tr = (float2) (-sample_5.y, sample_5.x);
+      sum_0 += weight_5_0.yy * sample_5_tr;
+      sum_1 += weight_5_1.yy * sample_5_tr;
+      sum_2 += weight_5_2.yy * sample_5_tr;
+#if !defined USE_WARP_SHUFFLE_INSN
+    }
+
+    barrier(CLK_LOCAL_MEM_FENCE);
+
+    if (validTime) {
+#endif
+      if (lastGroupOfStations) {
+        (*complexVoltages)[subband][time][first_tab + 0][pol] = sum_0;
+        (*complexVoltages)[subband][time][first_tab + 1][pol] = sum_1;
+        (*complexVoltages)[subband][time][first_tab + 2][pol] = sum_2;
+#if !defined USE_WARP_SHUFFLE_INSN
+      } else {
+        local_sums[0][station_group + 1][tab_group][pol] = sum_0;
+        local_sums[1][station_group + 1][tab_group][pol] = sum_1;
+        local_sums[2][station_group + 1][tab_group][pol] = sum_2;
+#endif
+      }
+    }
+  }
+}

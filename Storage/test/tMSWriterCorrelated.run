@@ -1,0 +1,14 @@
+#!/bin/bash
+
+./tMSWriterCorrelated
+
+# add path to casacore for lhn001, but don't fail if this does not work
+(
+. /opt/cep/login/bashrc && use LofIm
+) > /dev/null 2>&1 || true
+
+# if taql is unavailable, don't do subsequent tests
+taql --help >/dev/null 2>&1 || exit 3
+
+taql 'select ELEMENT_FLAG[,0] from tMSWriterCorrelated.in_1/SB000.MS::LOFAR_ANTENNA_FIELD'
+

@@ -1,0 +1,43 @@
+$Id: opencl-cuda-types.txt 27000 2013-10-17 09:11:13Z loose $
+
+GPUProc OpenCL/CUDA Type Correspondence
+=======================================
+
+OpenCL (cl.hpp)   CUDA (cuda.h)  GPUProc ({cuda|opencl}/gpu-wrapper.h)
+-------------------------------------------------------------------------
+cl::Context       CUcontext      gpu::Context
+cl::Program       CUmodule       gpu::Module
+cl::Kernel        CUfunction     gpu::Function
+cl::Buffer        void*          gpu::HostMemory (MultiArraySharedBuffer)
+(idem)            CUdeviceptr    gpu::DeviceMemory (idem)
+cl::Error         CUresult       gpu::Error
+(idem)            cudaError_t    gpu::GPUException
+cl::Device        CUdevice       gpu::Device
+cl::Event         CUevent        gpu::Event
+cl::CommandQueue  CUstream       gpu::Stream
+cl::NDRange       uint x, y, z   gpu::dim3
+cl::Platform      (none)         gpu::Platform
+-------------------------------------------------------------------------
+
+For the GPUProc types, we use the CUDA names as much as possible.
+
+To match the ref counting OpenCL types, all resource managing (meaningful
+destructor) CUDA types have a boost::shared_ptr around Impl classes.
+
+
+Mapping of OpenCL Dimensions and Indices to CUDA
+================================================
+
+OpenCL API Call         Explanation                     CUDA Equivalent
+-------------------------------------------------------------------------------
+get_global_id(0)        global index of the work        blockIdx.x * blockDim.x
+                        item in the x dimension         + threadIdx.x
+get_local_id(0)         local index of the work         threadIdx.x
+                        item within the work
+                        group in the x dimension
+get_global_size(0)      size of NDRange in the x        gridDim.x * blockDim.x
+                        dimension
+get_local_size(0)       size of each work group         blockDim.x
+                        in the x dimension
+
+OpenCL id/size 1 maps onto CUDA dimension y; and id/size 2 on dimension z.

@@ -1,0 +1,26 @@
+#!/bin/sh
+
+# Exit with skipped status if unable to reach RS005.
+ping -c 1 RS005.astron.nl > /dev/null 2>&1 ||  exit 3
+
+# Create the parset for this test.
+# The start and end times have to match those in the SAS data base.
+cat > tfailedtilesinfo_tmp.parset <<EOF
+StartTime = 2011/05/15/16:59:08.0 
+EndTime = 2012/10/21/22:59:06.0
+BrokenTilesFile = tfailedtilesinfo_tmp.before
+FailedTilesFile = tfailedtilesinfo_tmp.during
+host = RS005.astron.nl
+db = TESTLOFAR_4
+port = 5432
+EOF
+
+# Get the failed tile info.
+../src/failedtilesinfo tfailedtilesinfo_tmp.parset
+
+# Print the output, so it will be compared by assay.
+echo "Failed before:"
+cat tfailedtilesinfo_tmp.before
+echo
+echo "Failed during:"
+cat tfailedtilesinfo_tmp.during

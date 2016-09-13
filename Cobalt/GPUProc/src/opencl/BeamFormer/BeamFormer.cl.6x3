@@ -1,0 +1,140 @@
+#define NR_CHANNELS_PER_BLOCK   8
+
+
+typedef __global float4 (*ComplexVoltagesType)[NR_TABS][NR_SAMPLES_PER_INTEGRATION][NR_CHANNELS];
+//typedef __global float4 (*CorrectedDataType)[NR_STATIONS][NR_CHANNELS][NR_SAMPLES_PER_INTEGRATION];
+typedef __global float4 (*CorrectedDataType)[NR_STATIONS][NR_SAMPLES_PER_INTEGRATION][NR_CHANNELS];
+typedef __global float2 (*WeightsType)[NR_STATIONS][NR_CHANNELS][NR_TABS];
+
+float2 cmul(float2 a, float2 b)
+{
+  return (float2) { a.x * b.x - a.y * b.y, a.x * b.y + a.y * b.x };
+}
+
+
+__kernel void complexVoltages(__global void *complexVoltagesPtr,
+                              __global const void *correctedDataPtr,
+                              __global const void *weightsPtr)
+{
+  ComplexVoltagesType complexVoltages = (ComplexVoltagesType) complexVoltagesPtr;
+  CorrectedDataType correctedData = (CorrectedDataType) correctedDataPtr;
+  WeightsType weights = (WeightsType) weightsPtr;
+
+  uint first_tab = 3 * get_global_id(0);
+  uint channel = get_global_id(1);
+  uint first_station = 6 * get_global_id(2);
+
+  float2 weight_0_0 = (*weights)[first_station + 0][channel][first_tab + 0];
+  float2 weight_0_1 = (*weights)[first_station + 0][channel][first_tab + 1];
+  float2 weight_0_2 = (*weights)[first_station + 0][channel][first_tab + 2];
+  float2 weight_1_0 = (*weights)[first_station + 1][channel][first_tab + 0];
+  float2 weight_1_1 = (*weights)[first_station + 1][channel][first_tab + 1];
+  float2 weight_1_2 = (*weights)[first_station + 1][channel][first_tab + 2];
+  float2 weight_2_0 = (*weights)[first_station + 2][channel][first_tab + 0];
+  float2 weight_2_1 = (*weights)[first_station + 2][channel][first_tab + 1];
+  float2 weight_2_2 = (*weights)[first_station + 2][channel][first_tab + 2];
+  float2 weight_3_0 = (*weights)[first_station + 3][channel][first_tab + 0];
+  float2 weight_3_1 = (*weights)[first_station + 3][channel][first_tab + 1];
+  float2 weight_3_2 = (*weights)[first_station + 3][channel][first_tab + 2];
+  float2 weight_4_0 = (*weights)[first_station + 4][channel][first_tab + 0];
+  float2 weight_4_1 = (*weights)[first_station + 4][channel][first_tab + 1];
+  float2 weight_4_2 = (*weights)[first_station + 4][channel][first_tab + 2];
+  float2 weight_5_0 = (*weights)[first_station + 5][channel][first_tab + 0];
+  float2 weight_5_1 = (*weights)[first_station + 5][channel][first_tab + 1];
+  float2 weight_5_2 = (*weights)[first_station + 5][channel][first_tab + 2];
+
+  __local float4 local_sums[3][NR_STATIONS / 6][NR_CHANNELS_PER_BLOCK][NR_TABS / 3];
+
+  for (int time = 0 - first_station / 6; time < NR_SAMPLES_PER_INTEGRATION + NR_STATIONS - first_station / 6; time++) {
+    barrier(CLK_LOCAL_MEM_FENCE);
+
+    float4 sum_0, sum_1, sum_2;
+
+    if (first_station == 0) {
+      sum_0 = sum_1 = sum_2 = (float4) { 0, 0, 0, 0 };
+    } else {
+      sum_0 = local_sums[0][get_local_id(2) - 1][get_local_id(1)][get_local_id(0)];
+      sum_1 = local_sums[1][get_local_id(2) - 1][get_local_id(1)][get_local_id(0)];
+      sum_2 = local_sums[2][get_local_id(2) - 1][get_local_id(1)][get_local_id(0)];
+    }
+
+    float4 sample_0 = (*correctedData)[first_station + 0][time][channel];
+    float4 sample_1 = (*correctedData)[first_station + 1][time][channel];
+    float4 sample_2 = (*correctedData)[first_station + 2][time][channel];
+    float4 sample_3 = (*correctedData)[first_station + 3][time][channel];
+    float4 sample_4 = (*correctedData)[first_station + 4][time][channel];
+    float4 sample_5 = (*correctedData)[first_station + 5][time][channel];
+
+    sum_0 += weight_0_0.xxxx * sample_0;
+    sum_1 += weight_0_1.xxxx * sample_0;
+    sum_2 += weight_0_2.xxxx * sample_0;
+    sum_0 += weight_0_1.yyyy * (float4) { -sample_0.y, sample_0.x, -sample_0.w, sample_0.z };
+    sum_1 += weight_0_1.yyyy * (float4) { -sample_0.y, sample_0.x, -sample_0.w, sample_0.z };
+    sum_2 += weight_0_1.yyyy * (float4) { -sample_0.y, sample_0.x, -sample_0.w, sample_0.z };
+
+    sum_0 += weight_1_0.xxxx * sample_1;
+    sum_1 += weight_1_1.xxxx * sample_1;
+    sum_2 += weight_1_2.xxxx * sample_1;
+    sum_0 += weight_1_1.yyyy * (float4) { -sample_1.y, sample_1.x, -sample_1.w, sample_1.z };
+    sum_1 += weight_1_1.yyyy * (float4) { -sample_1.y, sample_1.x, -sample_1.w, sample_1.z };
+    sum_2 += weight_1_1.yyyy * (float4) { -sample_1.y, sample_1.x, -sample_1.w, sample_1.z };
+
+    sum_0 += weight_2_0.xxxx * sample_2;
+    sum_1 += weight_2_1.xxxx * sample_2;
+    sum_2 += weight_2_2.xxxx * sample_2;
+    sum_0 += weight_2_1.yyyy * (float4) { -sample_2.y, sample_2.x, -sample_2.w, sample_2.z };
+    sum_1 += weight_2_1.yyyy * (float4) { -sample_2.y, sample_2.x, -sample_2.w, sample_2.z };
+    sum_2 += weight_2_1.yyyy * (float4) { -sample_2.y, sample_2.x, -sample_2.w, sample_2.z };
+
+    sum_0 += weight_3_0.xxxx * sample_3;
+    sum_1 += weight_3_1.xxxx * sample_3;
+    sum_2 += weight_3_2.xxxx * sample_3;
+    sum_0 += weight_3_1.yyyy * (float4) { -sample_3.y, sample_3.x, -sample_3.w, sample_3.z };
+    sum_1 += weight_3_1.yyyy * (float4) { -sample_3.y, sample_3.x, -sample_3.w, sample_3.z };
+    sum_2 += weight_3_1.yyyy * (float4) { -sample_3.y, sample_3.x, -sample_3.w, sample_3.z };
+
+    sum_0 += weight_4_0.xxxx * sample_4;
+    sum_1 += weight_4_1.xxxx * sample_4;
+    sum_2 += weight_4_2.xxxx * sample_4;
+    sum_0 += weight_4_1.yyyy * (float4) { -sample_4.y, sample_4.x, -sample_4.w, sample_4.z };
+    sum_1 += weight_4_1.yyyy * (float4) { -sample_4.y, sample_4.x, -sample_4.w, sample_4.z };
+    sum_2 += weight_4_1.yyyy * (float4) { -sample_4.y, sample_4.x, -sample_4.w, sample_4.z };
+
+    sum_0 += weight_5_0.xxxx * sample_5;
+    sum_1 += weight_5_1.xxxx * sample_5;
+    sum_2 += weight_5_2.xxxx * sample_5;
+    sum_0 += weight_5_1.yyyy * (float4) { -sample_5.y, sample_5.x, -sample_5.w, sample_5.z };
+    sum_1 += weight_5_1.yyyy * (float4) { -sample_5.y, sample_5.x, -sample_5.w, sample_5.z };
+    sum_2 += weight_5_1.yyyy * (float4) { -sample_5.y, sample_5.x, -sample_5.w, sample_5.z };
+
+    barrier(CLK_LOCAL_MEM_FENCE);
+
+    if (first_station + 6 < NR_STATIONS) {
+      local_sums[0][get_local_id(2)][get_local_id(1)][get_local_id(0)] = sum_0;
+      local_sums[1][get_local_id(2)][get_local_id(1)][get_local_id(0)] = sum_1;
+      local_sums[2][get_local_id(2)][get_local_id(1)][get_local_id(0)] = sum_2;
+    } else if (time >= 0) {
+      (*complexVoltages)[first_tab + 0][time][channel] = sum_0;
+      (*complexVoltages)[first_tab + 1][time][channel] = sum_1;
+      (*complexVoltages)[first_tab + 2][time][channel] = sum_2;
+    }
+
+#if 0
+    local_complex_voltages[tab][local_time_or_channel] = sum;
+
+    barrier(CLK_LOCAL_MEM_FENCE);
+
+    (*complexVoltages)[transposed_tab][start_time + local_time][transposed_channel] = local_complex_voltages[transposed_tab][transposed_channel];
+#elif defined STOKES_I || defined STOKES_IQUV
+    float powerX = sum.x * sum.x + sum.y * sum.y;
+    float powerY = sum.z * sum.z + sum.w * sum.w;
+
+    (*stokes)[tab][0][0][time_or_channel] = powerX + powerY;
+#if defined STOKES_IQUV
+    (*stokes)[tab][1][0][time_or_channel] = powerX - powerY;
+    (*stokes)[tab][2][0][time_or_channel] = 2 * (sum.x * sum.z + sum.y * sum.w);
+    (*stokes)[tab][3][0][time_or_channel] = 2 * (sum.y * sum.z - sum.x * sum.w);
+#endif
+#endif
+  }
+}

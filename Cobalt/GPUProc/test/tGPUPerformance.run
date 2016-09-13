@@ -1,0 +1,7 @@
+#!/bin/bash
+TESTNAME=`basename "${0%%.run}"`
+
+PARSET=$srcdir/$TESTNAME.parset
+
+$srcdir/testParset.sh "$PARSET" -g 90 || exit $?
+

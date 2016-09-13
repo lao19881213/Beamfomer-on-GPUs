@@ -1,0 +1,24 @@
+OLAP.CNProc.integrationSteps		 = 256
+OLAP.correctBandPass			 = F
+Observation.nrBitsPerSample              = 8
+OLAP.CNProc.nrPPFTaps			 = 16
+Observation.VirtualInstrument.stationList = [CS002]
+Observation.antennaSet = HBA_DUAL
+Observation.nrBeams                      = 1
+Observation.Beam[0].subbandList	         = [300..301]
+Observation.rspBoardList                 = [0, 0]
+Observation.rspSlotList                  = [0, 1]
+OLAP.CNProc_CoherentStokes.timeIntegrationFactor = 1
+OLAP.CNProc_IncoherentStokes.timeIntegrationFactor = 1
+OLAP.CNProc_CoherentStokes.which	 = I # IQUV
+OLAP.CNProc_IncoherentStokes.which	 = I # IQUV
+OLAP.delayCompensation			 = F
+Observation.nrPolarisations		 = 2
+Observation.channelsPerSubband		 = 1
+Observation.sampleClock			 = 200
+
+
+
+Observation.DataProducts.Output_Correlated.enabled=true
+Observation.DataProducts.Output_Correlated.filenames=[L24523_B000_S0_P000_bf.ms,L24523_B000_S0_P000_bf.ms]
+Observation.DataProducts.Output_Correlated.locations=[lse011:/data3/L2011_24523/, lse011:/data3/L2011_24523/]

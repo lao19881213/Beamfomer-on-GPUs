@@ -1,0 +1,536 @@
+#define MAX(A,B) ((A)>(B) ? (A) : (B))
+#define NR_PASSES MAX((NR_STATIONS + 6) / 16, 1) // gives best results on GTX 680
+#define NR_STATIONS_PER_PASS ((NR_STATIONS + NR_PASSES - 1) / NR_PASSES)
+
+#if NR_STATIONS_PER_PASS > 32
+#error "need more passes to beam form this number of stations"
+#endif
+
+
+typedef __global float2 (*ComplexVoltagesType)[NR_TABS][NR_POLARIZATIONS][NR_CHANNELS][NR_TIMES_PER_BLOCK];
+typedef __global float4 (*BandPassCorrectedType)[NR_STATIONS][NR_CHANNELS][NR_TIMES_PER_BLOCK];
+typedef __global float2 (*WeightsType)[NR_STATIONS][NR_CHANNELS][NR_TABS];
+
+
+__kernel void complexVoltages(__global void *complexVoltagesPtr,
+                              __global const void *samplesPtr,
+                              __global const void *weightsPtr)
+{
+  ComplexVoltagesType complexVoltages = (ComplexVoltagesType) complexVoltagesPtr;
+  BandPassCorrectedType samples = (BandPassCorrectedType) samplesPtr;
+  WeightsType weights = (WeightsType) weightsPtr;
+
+  uint minor_time = get_local_id(0);
+  uint tab = get_global_id(1);
+  uint channel = get_global_id(2);
+
+  float4 sample;
+  __local float4 local_samples[NR_STATIONS_PER_PASS][16];
+
+#pragma unroll
+  for (uint first_station = 0; first_station < NR_STATIONS; first_station += NR_STATIONS_PER_PASS) {
+#if NR_STATIONS_PER_PASS >= 1
+    float2 weight_00;
+
+    if (first_station + 0 < NR_STATIONS)
+      weight_00 = (*weights)[first_station + 0][channel][tab];
+#endif
+
+#if NR_STATIONS_PER_PASS >= 2
+    float2 weight_01;
+
+    if (first_station + 1 < NR_STATIONS)
+      weight_01 = (*weights)[first_station + 1][channel][tab];
+#endif
+
+#if NR_STATIONS_PER_PASS >= 3
+    float2 weight_02;
+
+    if (first_station + 2 < NR_STATIONS)
+      weight_02 = (*weights)[first_station + 2][channel][tab];
+#endif
+
+#if NR_STATIONS_PER_PASS >= 4
+    float2 weight_03;
+
+    if (first_station + 3 < NR_STATIONS)
+      weight_03 = (*weights)[first_station + 3][channel][tab];
+#endif
+
+#if NR_STATIONS_PER_PASS >= 5
+    float2 weight_04;
+
+    if (first_station + 4 < NR_STATIONS)
+      weight_04 = (*weights)[first_station + 4][channel][tab];
+#endif
+
+#if NR_STATIONS_PER_PASS >= 6
+    float2 weight_05;
+
+    if (first_station + 5 < NR_STATIONS)
+      weight_05 = (*weights)[first_station + 5][channel][tab];
+#endif
+
+#if NR_STATIONS_PER_PASS >= 7
+    float2 weight_06;
+
+    if (first_station + 6 < NR_STATIONS)
+      weight_06 = (*weights)[first_station + 6][channel][tab];
+#endif
+
+#if NR_STATIONS_PER_PASS >= 8
+    float2 weight_07;
+
+    if (first_station + 7 < NR_STATIONS)
+      weight_07 = (*weights)[first_station + 7][channel][tab];
+#endif
+
+#if NR_STATIONS_PER_PASS >= 9
+    float2 weight_08;
+
+    if (first_station + 8 < NR_STATIONS)
+      weight_08 = (*weights)[first_station + 8][channel][tab];
+#endif
+
+#if NR_STATIONS_PER_PASS >= 10
+    float2 weight_09;
+
+    if (first_station + 9 < NR_STATIONS)
+      weight_09 = (*weights)[first_station + 9][channel][tab];
+#endif
+
+#if NR_STATIONS_PER_PASS >= 11
+    float2 weight_10;
+
+    if (first_station + 10 < NR_STATIONS)
+      weight_10 = (*weights)[first_station + 10][channel][tab];
+#endif
+
+#if NR_STATIONS_PER_PASS >= 12
+    float2 weight_11;
+
+    if (first_station + 11 < NR_STATIONS)
+      weight_11 = (*weights)[first_station + 11][channel][tab];
+#endif
+
+#if NR_STATIONS_PER_PASS >= 13
+    float2 weight_12;
+
+    if (first_station + 12 < NR_STATIONS)
+      weight_12 = (*weights)[first_station + 12][channel][tab];
+#endif
+
+#if NR_STATIONS_PER_PASS >= 14
+    float2 weight_13;
+
+    if (first_station + 13 < NR_STATIONS)
+      weight_13 = (*weights)[first_station + 13][channel][tab];
+#endif
+
+#if NR_STATIONS_PER_PASS >= 15
+    float2 weight_14;
+
+    if (first_station + 14 < NR_STATIONS)
+      weight_14 = (*weights)[first_station + 14][channel][tab];
+#endif
+
+#if NR_STATIONS_PER_PASS >= 16
+    float2 weight_15;
+
+    if (first_station + 15 < NR_STATIONS)
+      weight_15 = (*weights)[first_station + 15][channel][tab];
+#endif
+
+#if NR_STATIONS_PER_PASS >= 17
+    float2 weight_16;
+
+    if (first_station + 16 < NR_STATIONS)
+      weight_16 = (*weights)[first_station + 16][channel][tab];
+#endif
+
+#if NR_STATIONS_PER_PASS >= 18
+    float2 weight_17;
+
+    if (first_station + 17 < NR_STATIONS)
+      weight_17 = (*weights)[first_station + 17][channel][tab];
+#endif
+
+#if NR_STATIONS_PER_PASS >= 19
+    float2 weight_18;
+
+    if (first_station + 18 < NR_STATIONS)
+      weight_18 = (*weights)[first_station + 18][channel][tab];
+#endif
+
+#if NR_STATIONS_PER_PASS >= 20
+    float2 weight_19;
+
+    if (first_station + 19 < NR_STATIONS)
+      weight_19 = (*weights)[first_station + 19][channel][tab];
+#endif
+
+#if NR_STATIONS_PER_PASS >= 21
+    float2 weight_20;
+
+    if (first_station + 20 < NR_STATIONS)
+      weight_20 = (*weights)[first_station + 20][channel][tab];
+#endif
+
+#if NR_STATIONS_PER_PASS >= 22
+    float2 weight_21;
+
+    if (first_station + 21 < NR_STATIONS)
+      weight_21 = (*weights)[first_station + 21][channel][tab];
+#endif
+
+#if NR_STATIONS_PER_PASS >= 23
+    float2 weight_22;
+
+    if (first_station + 22 < NR_STATIONS)
+      weight_22 = (*weights)[first_station + 22][channel][tab];
+#endif
+
+#if NR_STATIONS_PER_PASS >= 24
+    float2 weight_23;
+
+    if (first_station + 23 < NR_STATIONS)
+      weight_23 = (*weights)[first_station + 23][channel][tab];
+#endif
+
+#if NR_STATIONS_PER_PASS >= 25
+    float2 weight_24;
+
+    if (first_station + 24 < NR_STATIONS)
+      weight_24 = (*weights)[first_station + 24][channel][tab];
+#endif
+
+#if NR_STATIONS_PER_PASS >= 26
+    float2 weight_25;
+
+    if (first_station + 25 < NR_STATIONS)
+      weight_25 = (*weights)[first_station + 25][channel][tab];
+#endif
+
+#if NR_STATIONS_PER_PASS >= 27
+    float2 weight_26;
+
+    if (first_station + 26 < NR_STATIONS)
+      weight_26 = (*weights)[first_station + 26][channel][tab];
+#endif
+
+#if NR_STATIONS_PER_PASS >= 28
+    float2 weight_27;
+
+    if (first_station + 27 < NR_STATIONS)
+      weight_27 = (*weights)[first_station + 27][channel][tab];
+#endif
+
+#if NR_STATIONS_PER_PASS >= 29
+    float2 weight_28;
+
+    if (first_station + 28 < NR_STATIONS)
+      weight_28 = (*weights)[first_station + 28][channel][tab];
+#endif
+
+#if NR_STATIONS_PER_PASS >= 30
+    float2 weight_29;
+
+    if (first_station + 29 < NR_STATIONS)
+      weight_29 = (*weights)[first_station + 29][channel][tab];
+#endif
+
+#if NR_STATIONS_PER_PASS >= 31
+    float2 weight_30;
+
+    if (first_station + 30 < NR_STATIONS)
+      weight_30 = (*weights)[first_station + 30][channel][tab];
+#endif
+
+#if NR_STATIONS_PER_PASS >= 32
+    float2 weight_31;
+
+    if (first_station + 31 < NR_STATIONS)
+      weight_31 = (*weights)[first_station + 31][channel][tab];
+#endif
+
+    for (uint time = 0; time < NR_TIMES_PER_BLOCK; time += 16) {
+#if 1
+      for (uint i = get_local_id(0) + 16 * get_local_id(1); i < NR_STATIONS_PER_PASS * 16; i += get_local_size(0) * get_local_size(1)) {
+        uint t = i % 16;
+        uint s = i / 16;
+
+        if (NR_TIMES_PER_BLOCK % 16 == 0 || time + t < NR_TIMES_PER_BLOCK)
+          if (NR_STATIONS % NR_STATIONS_PER_PASS == 0 || first_station + s < NR_STATIONS)
+            local_samples[0][i] = (*samples)[first_station + s][channel][time + t];
+      }
+
+      barrier(CLK_LOCAL_MEM_FENCE);
+#endif
+
+      /*for (uint t = 0; t < (NR_TIMES_PER_BLOCK % 16 == 0 ? 16 : min(16U, NR_TIMES_PER_BLOCK - time)); t ++)*/ {
+        float4 sum = first_station == 0 ? 0 : (float4) ((*complexVoltages)[tab][0][channel][time + minor_time], (*complexVoltages)[tab][1][channel][time + minor_time]);
+
+#if NR_STATIONS_PER_PASS >= 1
+        if (first_station + 1 < NR_STATIONS) {
+          sample = local_samples[0][minor_time];
+          sum += weight_00.xxxx * sample;
+          sum += weight_00.yyyy * (float4) (-sample.y, sample.x, -sample.w, sample.z);
+        }
+#endif
+
+#if NR_STATIONS_PER_PASS >= 2
+        if (first_station + 2 < NR_STATIONS) {
+          sample = local_samples[1][minor_time];
+          sum += weight_01.xxxx * sample;
+          sum += weight_01.yyyy * (float4) (-sample.y, sample.x, -sample.w, sample.z);
+        }
+#endif
+
+#if NR_STATIONS_PER_PASS >= 3
+        if (first_station + 3 < NR_STATIONS) {
+          sample = local_samples[2][minor_time];
+          sum += weight_02.xxxx * sample;
+          sum += weight_02.yyyy * (float4) (-sample.y, sample.x, -sample.w, sample.z);
+        }
+#endif
+
+#if NR_STATIONS_PER_PASS >= 4
+        if (first_station + 4 < NR_STATIONS) {
+          sample = local_samples[3][minor_time];
+          sum += weight_03.xxxx * sample;
+          sum += weight_03.yyyy * (float4) (-sample.y, sample.x, -sample.w, sample.z);
+        }
+#endif
+
+#if NR_STATIONS_PER_PASS >= 5
+        if (first_station + 5 < NR_STATIONS) {
+          sample = local_samples[4][minor_time];
+          sum += weight_04.xxxx * sample;
+          sum += weight_04.yyyy * (float4) (-sample.y, sample.x, -sample.w, sample.z);
+        }
+#endif
+
+#if NR_STATIONS_PER_PASS >= 6
+        if (first_station + 6 < NR_STATIONS) {
+          sample = local_samples[5][minor_time];
+          sum += weight_05.xxxx * sample;
+          sum += weight_05.yyyy * (float4) (-sample.y, sample.x, -sample.w, sample.z);
+        }
+#endif
+
+#if NR_STATIONS_PER_PASS >= 7
+        if (first_station + 7 < NR_STATIONS) {
+          sample = local_samples[6][minor_time];
+          sum += weight_06.xxxx * sample;
+          sum += weight_06.yyyy * (float4) (-sample.y, sample.x, -sample.w, sample.z);
+        }
+#endif
+
+#if NR_STATIONS_PER_PASS >= 8
+        if (first_station + 8 < NR_STATIONS) {
+          sample = local_samples[7][minor_time];
+          sum += weight_07.xxxx * sample;
+          sum += weight_07.yyyy * (float4) (-sample.y, sample.x, -sample.w, sample.z);
+        }
+#endif
+
+#if NR_STATIONS_PER_PASS >= 9
+        if (first_station + 9 < NR_STATIONS) {
+          sample = local_samples[8][minor_time];
+          sum += weight_08.xxxx * sample;
+          sum += weight_08.yyyy * (float4) (-sample.y, sample.x, -sample.w, sample.z);
+        }
+#endif
+
+#if NR_STATIONS_PER_PASS >= 10
+        if (first_station + 10 < NR_STATIONS) {
+          sample = local_samples[9][minor_time];
+          sum += weight_09.xxxx * sample;
+          sum += weight_09.yyyy * (float4) (-sample.y, sample.x, -sample.w, sample.z);
+        }
+#endif
+
+#if NR_STATIONS_PER_PASS >= 11
+        if (first_station + 11 < NR_STATIONS) {
+          sample = local_samples[10][minor_time];
+          sum += weight_10.xxxx * sample;
+          sum += weight_10.yyyy * (float4) (-sample.y, sample.x, -sample.w, sample.z);
+        }
+#endif
+
+#if NR_STATIONS_PER_PASS >= 12
+        if (first_station + 12 < NR_STATIONS) {
+          sample = local_samples[11][minor_time];
+          sum += weight_11.xxxx * sample;
+          sum += weight_11.yyyy * (float4) (-sample.y, sample.x, -sample.w, sample.z);
+        }
+#endif
+
+#if NR_STATIONS_PER_PASS >= 13
+        if (first_station + 13 < NR_STATIONS) {
+          sample = local_samples[12][minor_time];
+          sum += weight_12.xxxx * sample;
+          sum += weight_12.yyyy * (float4) (-sample.y, sample.x, -sample.w, sample.z);
+        }
+#endif
+
+#if NR_STATIONS_PER_PASS >= 14
+        if (first_station + 14 < NR_STATIONS) {
+          sample = local_samples[13][minor_time];
+          sum += weight_13.xxxx * sample;
+          sum += weight_13.yyyy * (float4) (-sample.y, sample.x, -sample.w, sample.z);
+        }
+#endif
+
+#if NR_STATIONS_PER_PASS >= 15
+        if (first_station + 15 < NR_STATIONS) {
+          sample = local_samples[14][minor_time];
+          sum += weight_14.xxxx * sample;
+          sum += weight_14.yyyy * (float4) (-sample.y, sample.x, -sample.w, sample.z);
+        }
+#endif
+
+#if NR_STATIONS_PER_PASS >= 16
+        if (first_station + 15 < NR_STATIONS) {
+          sample = local_samples[15][minor_time];
+          sum += weight_15.xxxx * sample;
+          sum += weight_15.yyyy * (float4) (-sample.y, sample.x, -sample.w, sample.z);
+        }
+#endif
+
+#if NR_STATIONS_PER_PASS >= 17
+        if (first_station + 16 < NR_STATIONS) {
+          sample = local_samples[16][minor_time];
+          sum += weight_16.xxxx * sample;
+          sum += weight_16.yyyy * (float4) (-sample.y, sample.x, -sample.w, sample.z);
+        }
+#endif
+
+#if NR_STATIONS_PER_PASS >= 18
+        if (first_station + 17 < NR_STATIONS) {
+          sample = local_samples[17][minor_time];
+          sum += weight_17.xxxx * sample;
+          sum += weight_17.yyyy * (float4) (-sample.y, sample.x, -sample.w, sample.z);
+        }
+#endif
+
+#if NR_STATIONS_PER_PASS >= 19
+        if (first_station + 18 < NR_STATIONS) {
+          sample = local_samples[18][minor_time];
+          sum += weight_18.xxxx * sample;
+          sum += weight_18.yyyy * (float4) (-sample.y, sample.x, -sample.w, sample.z);
+        }
+#endif
+
+#if NR_STATIONS_PER_PASS >= 20
+        if (first_station + 19 < NR_STATIONS) {
+          sample = local_samples[19][minor_time];
+          sum += weight_19.xxxx * sample;
+          sum += weight_19.yyyy * (float4) (-sample.y, sample.x, -sample.w, sample.z);
+        }
+#endif
+
+#if NR_STATIONS_PER_PASS >= 21
+        if (first_station + 20 < NR_STATIONS) {
+          sample = local_samples[20][minor_time];
+          sum += weight_20.xxxx * sample;
+          sum += weight_20.yyyy * (float4) (-sample.y, sample.x, -sample.w, sample.z);
+        }
+#endif
+
+#if NR_STATIONS_PER_PASS >= 22
+        if (first_station + 21 < NR_STATIONS) {
+          sample = local_samples[21][minor_time];
+          sum += weight_21.xxxx * sample;
+          sum += weight_21.yyyy * (float4) (-sample.y, sample.x, -sample.w, sample.z);
+        }
+#endif
+
+#if NR_STATIONS_PER_PASS >= 23
+        if (first_station + 22 < NR_STATIONS) {
+          sample = local_samples[22][minor_time];
+          sum += weight_22.xxxx * sample;
+          sum += weight_22.yyyy * (float4) (-sample.y, sample.x, -sample.w, sample.z);
+        }
+#endif
+
+#if NR_STATIONS_PER_PASS >= 24
+        if (first_station + 23 < NR_STATIONS) {
+          sample = local_samples[23][minor_time];
+          sum += weight_23.xxxx * sample;
+          sum += weight_23.yyyy * (float4) (-sample.y, sample.x, -sample.w, sample.z);
+        }
+#endif
+
+#if NR_STATIONS_PER_PASS >= 25
+        if (first_station + 25 < NR_STATIONS) {
+          sample = local_samples[24][minor_time];
+          sum += weight_24.xxxx * sample;
+          sum += weight_24.yyyy * (float4) (-sample.y, sample.x, -sample.w, sample.z);
+        }
+#endif
+
+#if NR_STATIONS_PER_PASS >= 26
+        if (first_station + 25 < NR_STATIONS) {
+          sample = local_samples[25][minor_time];
+          sum += weight_25.xxxx * sample;
+          sum += weight_25.yyyy * (float4) (-sample.y, sample.x, -sample.w, sample.z);
+        }
+#endif
+
+#if NR_STATIONS_PER_PASS >= 27
+        if (first_station + 26 < NR_STATIONS) {
+          sample = local_samples[26][minor_time];
+          sum += weight_26.xxxx * sample;
+          sum += weight_26.yyyy * (float4) (-sample.y, sample.x, -sample.w, sample.z);
+        }
+#endif
+
+#if NR_STATIONS_PER_PASS >= 28
+        if (first_station + 27 < NR_STATIONS) {
+          sample = local_samples[27][minor_time];
+          sum += weight_27.xxxx * sample;
+          sum += weight_27.yyyy * (float4) (-sample.y, sample.x, -sample.w, sample.z);
+        }
+#endif
+
+#if NR_STATIONS_PER_PASS >= 29
+        if (first_station + 28 < NR_STATIONS) {
+          sample = local_samples[28][minor_time];
+          sum += weight_28.xxxx * sample;
+          sum += weight_28.yyyy * (float4) (-sample.y, sample.x, -sample.w, sample.z);
+        }
+#endif
+
+#if NR_STATIONS_PER_PASS >= 30
+        if (first_station + 29 < NR_STATIONS) {
+          sample = local_samples[29][minor_time];
+          sum += weight_29.xxxx * sample;
+          sum += weight_29.yyyy * (float4) (-sample.y, sample.x, -sample.w, sample.z);
+        }
+#endif
+
+#if NR_STATIONS_PER_PASS >= 31
+        if (first_station + 30 < NR_STATIONS) {
+          sample = local_samples[30][minor_time];
+          sum += weight_30.xxxx * sample;
+          sum += weight_30.yyyy * (float4) (-sample.y, sample.x, -sample.w, sample.z);
+        }
+#endif
+
+#if NR_STATIONS_PER_PASS >= 32
+        if (first_station + 31 < NR_STATIONS) {
+          sample = local_samples[31][minor_time];
+          sum += weight_31.xxxx * sample;
+          sum += weight_31.yyyy * (float4) (-sample.y, sample.x, -sample.w, sample.z);
+        }
+#endif
+
+        (*complexVoltages)[tab][0][channel][time + minor_time] = sum.xy;
+        (*complexVoltages)[tab][1][channel][time + minor_time] = sum.zw;
+      }
+
+      barrier(CLK_LOCAL_MEM_FENCE);
+    }
+  }
+}

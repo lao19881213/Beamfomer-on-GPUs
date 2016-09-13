@@ -1,0 +1,30 @@
+#!/bin/bash
+
+./tMSWriterCorrelated
+status=$?
+if [ $status -ne 0 ]; then
+  echo "tMSWriterCorrelated.run: ./tMSWriterCorrelated failed with exit status $status"
+  exit $status
+fi
+
+# add path to casacore's taql for lhn001, but don't fail or print crap if this does not work
+{
+  . /opt/cep/login/bashrc && use LofIm ;
+} > /dev/null 2>&1 || true
+
+# if taql is unavailable, don't do subsequent tests
+taql --help >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+  echo "tMSWriterCorrelated.run: WARNING: Could not start `taql`. Skipping output verification."
+  exit 3
+fi
+
+
+# This requires that tMSWriterCorrelated has found static meta data files.
+# Otherwise, the tables are not created, an exception is caught and printed,
+# but tMSWriterCorrelated returns 0. This will then fail (if taql is found).
+
+# The taql needs the LOFAR storage manager library to read our LOFAR correlator MS output.
+export LD_LIBRARY_PATH=@CMAKE_BINARY_DIR@/RTCP/LofarStMan/src:$LD_LIBRARY_PATH
+taql 'select ELEMENT_FLAG[,0] from tMSWriterCorrelated.in_1/SB000.MS::LOFAR_ANTENNA_FIELD'
+

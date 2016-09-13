@@ -1,0 +1,97 @@
+\documentclass{report}
+\begin{document}
+\section{Introduction}
+The central processing of station data in LOFAR is currently performed by the IBM BlueGene/P super computer. The Cobalt project aims to create a replacement for the super computer using a small GPU cluster. To be able to act as a replacement, the Cobalt software/hardware setup needs to be able to deliver performance capable of processing LOFAR observations in real time.
+
+The Cobalt software is still under development, and its hardware is not connected to all LOFAR stations. It is therefor impossible to measure the final performance figures of Cobalt. Instead, we will measure the current performance, and extrapolate those data towards processing full LOFAR observations. If needed, performance improvements can be obtained by improving the efficiency of the software, and/or by adding additional Cobalt processing nodes.
+
+This report is set up as follows. First, we present the current Cobalt setup, followed by the test setup. Then, we measure the end-to-end performance figures of the correlator pipeline. Then, we present performance figures for the beamformer pipeline. We will discuss expected performance improvements from software improvements as well as hardware expansion. We end this report with conclusions and recommendations.
+
+\section{Cobalt Setup}
+
+The Cobalt system consists of 8 processing nodes, each containing:
+
+\begin{itemize}
+\item Dual CPUs
+\item Two NVIDIA K10 GPUs, used for processing
+\item Two InfiniBand QDR cards, used to exchange data within Cobalt
+\item Two Intel 10GBE cards, with two 10GbE ports each, used for input/output with external systems
+\end{itemize}
+
+Each Cobalt node is used as two independent processing systems, each utilising half of the resources of the machine. The Cobalt nodes are connected to external systems, currently allowing:
+
+\begin{itemize}
+\item Reception of data from up to 48 antenna fields.
+\item Sending data to the CEP2 storage cluster at 8 Gbit/s.
+\end{itemize}
+
+Both limits will be upgraded to full LOFAR capacity before the end of 2013, allowing the reception of up to 80 antenna fields, and 80 Gbit/s to CEP2. In order to simulate Cobalt's behaviour under its final load, we have created an imbalanced setup, stressing one system (cbt005) under its expected load, rather than the average obtainable load. To compensate, another node (cbt008) will not receive any station data.
+
+\section {Test Setup}
+
+The acceptance criterium for each test run is whether Cobalt system runs at real time, that is, can keep up with the data flow with $<<1\%$ loss. Each test run will run for 5 minutes, which is enough to measure the system's capability. Longer test runs, required for stability testing, will be performed at a later stage.
+
+Apart from data loss, we will keep track of the CPU load on the most stressed node in the system (cbt005), as we expect that figure to be critical for Cobalt.
+
+\section{Correlator Performance}
+
+The Correlator performance of Cobalt will be measured in two ways. First, we will determine how many antenna fields can be correlated at real time at the full spectral bandwidth. Secondly, we will determine how many subbands we can process if we correlate all 48 antenna fields.
+
+\begin{figure}
+\centering
+%\includegraphics[scale=1]{pic.png}
+\caption{Average data loss when processing the full bandwidth of a varying number of antenna fields.}
+\label{fig:corr_stations_loss}
+\end{figure}
+
+\begin{figure}
+\centering
+%\includegraphics[scale=1]{pic.png}
+\caption{System load on cbt005 when processing the full bandwidth of a varying number of antenna fields.}
+\label{fig:corr_stations_load}
+\end{figure}
+
+We show the performance as a function of the number of antenna fields in Figures \ref{fig:corr_stations_loss} and \ref{fig:corr_stations_load}. In all cases, 488 subbands were streamed in 8-bit mode.
+
+\begin{figure}
+\centering
+%\includegraphics[scale=1]{pic.png}
+\caption{Average data loss when processing a various number of subbands from all antenna fields.}
+\label{fig:corr_subbands_loss}
+\end{figure}
+
+\begin{figure}
+\centering
+%\includegraphics[scale=1]{pic.png}
+\caption{System load on cbt005 when processing a various number of subbands from all antenna fields.}
+\label{fig:corr_subbands_load}
+\end{figure}
+
+Figures \ref{fig:corr_subbands_loss} and \ref{fig:corr_subbands_load} show the performance of Cobalt if all 48 antenna fields are used, processing an increasing number of subbands in each test run.
+
+\section{Beamformer Performance}
+
+The Beamformer pipeline of Cobalt has behaviour similar to the Correlator pipeline. The network loads are similar, as is the CPU load. The actual algorithms, which are performed on the GPU, do of course differ drastically. For that reason, we focus on measuring the GPU load when creating a various amount of Tied-Array Beams (TABs) using a varying number of different stations.
+
+\begin{figure}
+\centering
+%\includegraphics[scale=1]{pic.png}
+\caption{The runtime of the Beamformer kernels versus the number of created TABs.}
+\label{fig:bf_tabs}
+\end{figure}
+
+In Figure \ref{fig:bf_tabs}, we create an increasing number of TABs from data originating from 48 antenna fields. It is not necessary to scale in the number of subbands used in the observation, because each subband is processed independently. Results for one subband are used to calculate the expected system load for 488 subbands, at which point an assessment is made whether Cobalt will be able to handle such a load at real time.
+
+\section{Expected Improvements}
+
+The Cobalt system is still under development, especially the software. Not all code has been optimised or fully optimised for performance. Improvements are thus still to be expected. However, it is hard to realistically quantify the gain of programming effort in advance. For that reason, we will also present the performance that can be gained for the current software by adding more hardware.
+
+\subsection{Software improvements}
+\subsection{Adding more hardware}
+
+Currently, the Cobalt cluster consists of 8 nodes, and 1 hot spare/development node. The latter is necessary for fall-back, and 1 development is already a very bare minimum. As such, we do not consider the scenario of using the 9th node to be used for observations (assuming no other node is broken), and will omit the spare node in this report.
+
+The Cobalt cluster is expandable to roughly 18 nodes without needing additional infrastructure, apart from cables. Each additional Cobalt node thus causes a linear increase in performance. More specifically, each additional Cobalt node delivers a $1/8=12.5\%$ performance increase.
+
+\section{Conclusions and Recommendations}
+\end{document}

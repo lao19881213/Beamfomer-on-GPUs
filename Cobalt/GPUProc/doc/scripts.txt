@@ -1,0 +1,26 @@
+GPUProc/{src,test} contain several scripts to start observations. The call chain is as follows:
+
+      OnlineControl (MAC)
+       |         ^
+       V         |
+startBGL.sh -> runObservation.sh -> mpirun.sh -> [mpirun] rtcp
+    ^                ^
+    |                |
+tstartBGL.sh    tMACfeedback.sh
+                tProductionParsets.sh
+                testParset.sh
+
+The central thread is the main call chain, with the following roles and responsibilities:
+
+  startBGL.sh:        - starts an observation in the background
+                      - adheres to specific parameter order as specified by OnlineControl
+                      - augments parset with Cobalt-specific settingsa
+
+  runObservation.sh:  - (optionally) copies feedback to MAC after the observation
+                      - (optionally) informs OnlineControl after observation finishes
+
+  mpirun.sh:          - acts as mpirun, but wraps the currently selected MPI library
+                        (OpenMPI, MVAPICH2, no MPI) in a generic way.
+
+  rtcp:               - the actual program that performs the observation
+
